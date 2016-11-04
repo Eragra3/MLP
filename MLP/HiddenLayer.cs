@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static MLP.HelperFunctions;
 
 namespace MLP
 {
@@ -25,8 +26,8 @@ namespace MLP
 
         public HiddenLayer(int inputsCount, int outputsCount)
         {
-            _weights = AlgebraHelper.GetRandomMatrix(inputsCount, outputsCount);
-            _biases = AlgebraHelper.GetRandomVector(inputsCount);
+            _weights = MatrixHelper.GetRandomMatrix(inputsCount, outputsCount);
+            _biases = MatrixHelper.GetRandomVector(inputsCount);
         }
 
         /// <summary>
@@ -52,34 +53,6 @@ namespace MLP
             }
 
             return Sigmoid(output);
-        }
-
-        public static float[] Sigmoid(float[] input)
-        {
-            for (int i = 0; i < input.Length; i++)
-            {
-                input[i] = 1.0f / (1.0f + (float)Math.Exp(-input[i]));
-            }
-
-            return input;
-        }
-
-        public static float[] SigmoidPrime(float[] input)
-        {
-            var sig1 = new float[input.Length];
-
-            //sigmoid
-            for (int i = 0; i < input.Length; i++)
-            {
-                sig1[i] = 1.0f / (1.0f + (float)Math.Exp(-input[i]));
-            }
-
-            for (int i = 0; i < input.Length; i++)
-            {
-                input[i] = sig1[i] * (1 - 1.0f / (1.0f + (float)Math.Exp(-input[i])));
-            }
-
-            return input;
         }
     }
 }

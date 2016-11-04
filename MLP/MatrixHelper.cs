@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MLP
 {
-    public static class AlgebraHelper
+    public static class MatrixHelper
     {
         private static Random _rng = new Random();
 

@@ -50,9 +50,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AlgebraHelper.cs" />
+    <Compile Include="MatrixHelper.cs" />
     <Compile Include="Cmd\Command.cs" />
     <Compile Include="Extensions\RandomExtensions.cs" />
+    <Compile Include="HelperFunctions.cs" />
     <Compile Include="HiddenLayer.cs" />
     <Compile Include="MLP.cs" />
     <Compile Include="Program.cs" />

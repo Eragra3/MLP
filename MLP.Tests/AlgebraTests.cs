@@ -22,7 +22,7 @@ namespace MLP.Tests
                 new float[]{11, 12 }
             };
 
-            var result = AlgebraHelper.Multiply(m1, m2);
+            var result = MatrixHelper.Multiply(m1, m2);
 
             Assert.AreEqual(58, result[0][0]);
             Assert.AreEqual(64, result[0][1]);

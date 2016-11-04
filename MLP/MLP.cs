@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static MLP.HelperFunctions;
 
 namespace MLP
 {
@@ -20,14 +21,40 @@ namespace MLP
             }
         }
 
+        /// <summary>
+        /// acts as output layer
+        /// </summary>
+        /// <param name="inputs"></param>
+        /// <returns></returns>
         public float[] Feedforward(float[] inputs)
         {
+            float[] output = inputs;
+
             for (int i = 0; i < layers.Length; i++)
             {
-                var layer = layers[i];
-
-                layer.
+                output = layers[i].Feedforward(output);
             }
+
+            return Sigmoid(output);
+        }
+
+        public int GetLabel(float[] inputs)
+        {
+            var output = Feedforward(inputs);
+
+            var max = output[0];
+            var maxIndex = 0;
+
+            for (int i = 1; i < output.Length; i++)
+            {
+                if (output[i] > max)
+                {
+                    max = output[i];
+                    maxIndex = i;
+                }
+            }
+
+            return maxIndex;
         }
     }
 }
