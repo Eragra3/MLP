@@ -16,6 +16,9 @@ namespace MLP
         [JsonProperty]
         private int[] _sizes;
 
+        /// <summary>
+        /// Should only be used to create deserialized object
+        /// </summary>
         public MLP() { }
 
         public MLP(params int[] sizes)
@@ -46,7 +49,7 @@ namespace MLP
             return Sigmoid(output);
         }
 
-        public int GetLabel(float[] inputs)
+        public int Compute(float[] inputs)
         {
             var output = Feedforward(inputs);
 
@@ -63,6 +66,14 @@ namespace MLP
             }
 
             return maxIndex;
+        }
+
+        public void Train(float[] inputs, int expectedSolution)
+        {
+            var solution = Compute(inputs);
+
+
+
         }
 
         public string ToJson()

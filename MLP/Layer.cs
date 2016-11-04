@@ -27,6 +27,11 @@ namespace MLP
         [JsonProperty]
         private float[] _biases;
 
+        /// <summary>
+        /// Previous output. Used in backpropagation algorithm
+        /// </summary>
+        public float[] Output { get; private set; }
+
         public Layer(int inputsCount, int outputsCount)
         {
             _weights = MatrixHelper.GetRandomMatrix(outputsCount, inputsCount);
@@ -55,7 +60,11 @@ namespace MLP
                 }
             }
 
-            return Sigmoid(output);
+            Sigmoid(output);
+
+            Output = output;
+
+            return output;
         }
     }
 }

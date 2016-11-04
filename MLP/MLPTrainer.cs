@@ -27,7 +27,7 @@ namespace MLP
             {
                 var model = testData[i];
 
-                var decision = mlp.GetLabel(model.ValuesFloats);
+                var decision = mlp.Compute(model.ValuesFloats);
 
                 if (decision == model.Label) correctSolutions++;
             }

@@ -96,7 +96,7 @@ namespace MLP
 
                             var image = MnistParser.ReadImage(imagePath);
 
-                            var decision = mlp.GetLabel(image.ValuesFloats);
+                            var decision = mlp.Compute(image.ValuesFloats);
 
                             Console.WriteLine($"Result - {decision}");
                             Console.WriteLine($"Expected - {image.Label}");
