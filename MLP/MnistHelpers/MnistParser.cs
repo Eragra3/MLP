@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.IO;
 
 namespace MLP.MnistHelpers
@@ -42,6 +43,22 @@ namespace MLP.MnistHelpers
             return image;
         }
 
+        public static MnistImage[] ReadAll(string pathToDirectory)
+        {
+            var directoryInfo = new DirectoryInfo(pathToDirectory);
+
+            var files = directoryInfo.GetFiles("*.png");
+            var count = files.Length;
+            var models = new MnistImage[count];
+
+            for (int i = 0; i < files.Length; i++)
+            {
+                models[i] = ReadImage(files[i].FullName);
+            }
+
+            return models;
+        }
+
         public class MnistImage
         {
             public int[] Values;
@@ -49,6 +66,8 @@ namespace MLP.MnistHelpers
             public int Width;
             public int Label;
             public string FileName;
+
+            public float[] ValuesFloats => Array.ConvertAll(Values, x => (float)x);
         }
     }
 }

@@ -3,30 +3,33 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using static MLP.HelperFunctions;
 
 namespace MLP
 {
-    public class HiddenLayer
+    public class Layer
     {
         /// <summary>
         /// Matrix
-        /// dimensions: I x O
+        /// dimensions: O x I
         /// </summary>
         /// <remarks>
         /// I == N
         /// Input count is same as neuron count
         /// </remarks>
+        [JsonProperty]
         private float[][] _weights;
         /// <summary>
         /// Vector
         /// dimensions: I
         /// </summary>
+        [JsonProperty]
         private float[] _biases;
 
-        public HiddenLayer(int inputsCount, int outputsCount)
+        public Layer(int inputsCount, int outputsCount)
         {
-            _weights = MatrixHelper.GetRandomMatrix(inputsCount, outputsCount);
+            _weights = MatrixHelper.GetRandomMatrix(outputsCount, inputsCount);
             _biases = MatrixHelper.GetRandomVector(inputsCount);
         }
 
@@ -37,8 +40,8 @@ namespace MLP
         /// <returns></returns>
         public float[] Feedforward(float[] inputs)
         {
-            var O = _weights[0].Length;
-            var I = _weights.Length;
+            var I = _weights[0].Length;
+            var O = _weights.Length;
 
             var output = new float[O];
             for (int i = 0; i < O; i++)

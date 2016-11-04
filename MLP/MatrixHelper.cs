@@ -11,7 +11,7 @@ namespace MLP
         private static Random _rng = new Random();
 
         /// <summary>
-        /// Returned matrix is in column notation
+        /// Returnes matrix is in column notation
         /// </summary>
         /// <param name="x">height of matrix</param>
         /// <param name="y">width of matrix</param>

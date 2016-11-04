@@ -11,15 +11,21 @@ namespace MLP
     public class MLP
     {
         [JsonProperty]
-        private HiddenLayer[] layers;
+        private Layer[] _layers;
+
+        [JsonProperty]
+        private int[] _sizes;
+
+        public MLP() { }
 
         public MLP(params int[] sizes)
         {
-            layers = new HiddenLayer[sizes.Length];
+            _sizes = sizes;
+            _layers = new Layer[sizes.Length - 1];
 
             for (int i = 0; i < sizes.Length - 1; i++)
             {
-                layers[i] = new HiddenLayer(sizes[i], sizes[i + 1]);
+                _layers[i] = new Layer(sizes[i], sizes[i + 1]);
             }
         }
 
@@ -32,9 +38,9 @@ namespace MLP
         {
             float[] output = inputs;
 
-            for (int i = 0; i < layers.Length; i++)
+            for (int i = 0; i < _layers.Length; i++)
             {
-                output = layers[i].Feedforward(output);
+                output = _layers[i].Feedforward(output);
             }
 
             return Sigmoid(output);
