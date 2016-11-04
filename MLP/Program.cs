@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MLP.Cmd;
+using MLP.MnistHelpers;
 using TTRider.FluidCommandLine;
+using System.IO;
 
 namespace MLP
 {
@@ -16,7 +18,8 @@ namespace MLP
             string neuralNetworkJson = "";
             bool isVerbose = false;
             string outputPath = "";
-            int imageIndex = 1;
+            string imagePath = "";
+            bool print = false;
 
             ICommandLine commandLine = CommandLine
                 .Help("h")
@@ -30,10 +33,9 @@ namespace MLP
                     .Option("v", () => isVerbose = true, "Explain what is happening")
                     .Option("verbose", () => isVerbose = true, "Explain what is happening")
                 .Command("view", () => command = Command.View, "Show MNIST imag")
-                    .DefaultParameter("path", path => outputPath = path, "Path to MNIST dat file")
-                    .DefaultParameter("index", index => imageIndex = int.Parse(index), "Index of image you want to show")
-                    .Option("v", () => isVerbose = true, "Explain what is happening")
-                    .Option("verbose", () => isVerbose = true, "Explain what is happening")
+                    .DefaultParameter("path", path => imagePath = path, "Path to image")
+                    .Option("p", () => print = true, "Display grayscale interpretation")
+                    .Option("print", () => print = true, "Display grayscale interpretation")
                 .End();
 
             commandLine.Run(args);
@@ -47,7 +49,24 @@ namespace MLP
                     Console.WriteLine($"Testing {neuralNetworkJson}");
                     break;
                 case Command.View:
-                    Console.WriteLine($"Showing {neuralNetworkJson}");
+                    if (string.IsNullOrEmpty(imagePath))
+                    {
+                        Console.WriteLine($"Path to image not set");
+                        return;
+                    }
+                    if (!File.Exists(imagePath))
+                    {
+                        Console.WriteLine($"File {imagePath} does not exist!");
+                        return;
+                    }
+
+                    var model = MnistParser.ReadImage(imagePath);
+
+                    if (print)
+                    {
+                        var modelMatrix = MnistViewer.ToMatrix(model.Values, model.Width);
+                        Console.WriteLine(modelMatrix);
+                    }
                     break;
                 case Command.Help:
                     commandLine.Run("help");

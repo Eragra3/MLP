@@ -39,6 +39,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -50,12 +51,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MnistHelpers\MnistParser.cs" />
     <Compile Include="MatrixHelper.cs" />
     <Compile Include="Cmd\Command.cs" />
     <Compile Include="Extensions\RandomExtensions.cs" />
     <Compile Include="HelperFunctions.cs" />
     <Compile Include="HiddenLayer.cs" />
     <Compile Include="MLP.cs" />
+    <Compile Include="MnistHelpers\MnistViewer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
