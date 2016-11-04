@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using static MLP.HelperFunctions;
 
 namespace MLP
 {
     public class MLP
     {
+        [JsonProperty]
         private HiddenLayer[] layers;
 
         public MLP(params int[] sizes)
@@ -55,6 +57,16 @@ namespace MLP
             }
 
             return maxIndex;
+        }
+
+        public string ToJson()
+        {
+            return JsonConvert.SerializeObject(this, Formatting.Indented);
+        }
+
+        public static MLP FromJson(string json)
+        {
+            return JsonConvert.DeserializeObject<MLP>(json);
         }
     }
 }
