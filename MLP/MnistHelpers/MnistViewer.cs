@@ -26,5 +26,18 @@ namespace MLP.MnistHelpers
 
             return sb.ToString();
         }
+
+        public static string Print(MnistParser.MnistImage image)
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine(ToMatrix(image.Values, image.Width));
+            sb.AppendLine($"Filename - {image.FileName}");
+            sb.AppendLine($"Label - {image.Label}");
+            sb.AppendLine($"Width - {image.Width}");
+            sb.Append($"Height - {image.Height}");
+
+            return sb.ToString();
+        }
     }
 }

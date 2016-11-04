@@ -1,12 +1,18 @@
 ﻿using System.Drawing;
+using System.IO;
 
 namespace MLP.MnistHelpers
 {
     public static class MnistParser
     {
+        public static readonly char[] FileSeparators = new[] { '/', '\\' };
+
         public static MnistImage ReadImage(string path)
         {
             Bitmap bitmap = new Bitmap(path);
+
+            var fileName = path.Substring(path.LastIndexOfAny(FileSeparators) + 1);
+            var label = int.Parse(fileName[0].ToString());
 
             var values = new int[bitmap.Height * bitmap.Width];
 
@@ -28,7 +34,9 @@ namespace MLP.MnistHelpers
             {
                 Width = bitmap.Width,
                 Height = bitmap.Height,
-                Values = values
+                Values = values,
+                FileName = fileName,
+                Label = label
             };
 
             return image;
@@ -39,6 +47,8 @@ namespace MLP.MnistHelpers
             public int[] Values;
             public int Height;
             public int Width;
+            public int Label;
+            public string FileName;
         }
     }
 }

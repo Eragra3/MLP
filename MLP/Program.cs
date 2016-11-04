@@ -64,8 +64,8 @@ namespace MLP
 
                     if (print)
                     {
-                        var modelMatrix = MnistViewer.ToMatrix(model.Values, model.Width);
-                        Console.WriteLine(modelMatrix);
+                        var modelMatrix = MnistViewer.Print(model);
+                        Console.Write(modelMatrix);
                     }
                     break;
                 case Command.Help:
