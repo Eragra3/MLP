@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -27,11 +28,27 @@ namespace MLP.MnistHelpers
             return sb.ToString();
         }
 
-        public static string Print(MnistParser.MnistImage image)
+        public static string Print(int[] model, int width)
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine(ToMatrix(image.Values, image.Width));
+            for (int i = 0; i < model.Length; i++)
+            {
+                if (model[i] > 196) sb.Append(" ");
+                else if (model[i] > 32) sb.Append("+");
+                else sb.Append("@");
+
+                if ((i + 1) % width == 0) sb.Append("\n");
+            }
+
+            return sb.ToString();
+        }
+
+        public static string Dump(MnistParser.MnistImage image)
+        {
+            var sb = new StringBuilder();
+
+            sb.Append(Print(image.Values, image.Width));
             sb.AppendLine($"Filename - {image.FileName}");
             sb.AppendLine($"Label - {image.Label}");
             sb.AppendLine($"Width - {image.Width}");

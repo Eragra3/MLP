@@ -23,6 +23,7 @@ namespace MLP
             string outputPath = "";
             string imagePath = "";
             bool print = false;
+            bool dump = false;
             int[] layersSizes = { 70, 15, 10 };
             bool evaluate = false;
 
@@ -46,6 +47,8 @@ namespace MLP
                     .DefaultParameter("path", path => imagePath = path, "Path to image")
                     .Option("p", () => print = true, "Display grayscale interpretation")
                     .Option("print", () => print = true, "Display grayscale interpretation")
+                    .Option("d", () => dump = true, "Dump image data")
+                    .Option("dump", () => dump = true, "Dump image data")
                 .End();
 
             commandLine.Run(args);
@@ -127,9 +130,15 @@ namespace MLP
 
                         var model = MnistParser.ReadImage(imagePath);
 
+                        if (dump)
+                        {
+                            var modelDump = MnistViewer.Dump(model);
+                            Console.Write(modelDump);
+                        }
+
                         if (print)
                         {
-                            var modelMatrix = MnistViewer.Print(model);
+                            var modelMatrix = MnistViewer.ToMatrix(model.Values, model.Width);
                             Console.Write(modelMatrix);
                         }
                         break;
