@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 using Newtonsoft.Json;
 using static MLP.HelperFunctions;
 
@@ -19,23 +21,19 @@ namespace MLP
         /// Input count is same as neuron count
         /// </remarks>
         [JsonProperty]
-        private float[][] _weights;
+        private Matrix<double> _weights;
+
         /// <summary>
         /// Vector
         /// dimensions: I
         /// </summary>
         [JsonProperty]
-        private float[] _biases;
-
-        /// <summary>
-        /// Previous output. Used in backpropagation algorithm
-        /// </summary>
-        public float[] Output { get; private set; }
+        private Vector<double> _biases;
 
         public Layer(int inputsCount, int outputsCount)
         {
-            _weights = MatrixHelper.GetRandomMatrix(outputsCount, inputsCount);
-            _biases = MatrixHelper.GetRandomVector(inputsCount);
+            _weights = new DenseMatrix(outputsCount, inputsCount);
+            _biases = new DenseVector(inputsCount);
         }
 
         /// <summary>
@@ -43,15 +41,15 @@ namespace MLP
         /// </summary>
         /// <param name="inputs">Vector dimensions: I</param>
         /// <returns></returns>
-        public float[] Feedforward(float[] inputs)
+        public Vector<double> Feedforward(Vector<double> inputs)
         {
-            var I = _weights[0].Length;
-            var O = _weights.Length;
+            var I = _weights.ColumnCount;
+            var O = _weights.RowCount;
 
-            var output = new float[O];
+            var output = new DenseVector(O);
             for (int i = 0; i < O; i++)
             {
-                var neuronWeights = _weights[i];
+                var neuronWeights = _weights.Column(i);
                 var neuronBias = _biases[i];
 
                 for (int j = 0; j < I; j++)
@@ -60,11 +58,31 @@ namespace MLP
                 }
             }
 
-            Sigmoid(output);
+            return Sigmoid(output);
+        }
 
-            Output = output;
+        public Vector<double> GetOutput(Vector<double> inputs)
+        {
+            var I = _weights.ColumnCount;
+            var O = _weights.RowCount;
 
+            var output = new DenseVector(O);
+            for (int i = 0; i < O; i++)
+            {
+                var neuronWeights = _weights.Column(i);
+                var neuronBias = _biases[i];
+
+                for (int j = 0; j < I; j++)
+                {
+                    output[i] += inputs[j] * neuronWeights[j] + neuronBias;
+                }
+            }
             return output;
+        }
+
+        public Vector<double> GetActivation(Vector<double> output)
+        {
+            return Sigmoid(output);
         }
     }
 }

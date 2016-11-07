@@ -61,9 +61,8 @@ namespace MLP
                         {
                             File.Create(outputPath).Close();
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {
-                            Console.WriteLine(e);
                             Console.WriteLine($"Path is invalid");
                             return;
                         }

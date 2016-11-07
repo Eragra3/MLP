@@ -40,6 +40,36 @@ namespace MLP
             return vector;
         }
 
+        public static float[][] GetZerosMatrix(int x, int y)
+        {
+            var matrix = new float[x][];
+            for (int i = 0; i < matrix.Length; i++)
+            {
+                matrix[i] = new float[y];
+            }
+            return matrix;
+        }
+
+        public static float[] GetZerosVector(int x)
+        {
+            var vector = new float[x];
+            return vector;
+        }
+
+        public static float[][] MultiplyVectors(float[] col, float[] row)
+        {
+            var result = new float[col.Length][];
+            for (int i = 0; i < col.Length; i++)
+            {
+                result[i] = new float[row.Length];
+                for (int j = 0; j < row.Length; j++)
+                {
+                    result[i][j] = col[i] * row[j];
+                }
+            }
+            return result;
+        }
+
         /// <summary>
         /// A x B  *  X x Y
         /// </summary>
@@ -76,5 +106,42 @@ namespace MLP
 
             return result;
         }
+
+        /// <summary>
+        /// A x B  *  X x Y
+        /// </summary>
+        /// <param name="m1"></param>
+        /// <param name="m2"></param>
+        /// <returns></returns>
+        public static float[][] MultiplyTransposedAndVector(float[][] m1T, float[] vector)
+        {
+            var A = m1T.Length;
+            var B = m1T[0].Length;
+            var X = vector.Length;
+
+            if (B != X)
+            {
+                var msg = $"Matrices have wrong dimensions! {B}x{A} {X}";
+                throw new ArgumentException(msg);
+            }
+
+            var result = new float[A][]; // A x Y
+            for (int i = 0; i < A; i++)
+            {
+                result[i] = new float[Y];
+                for (int j = 0; j < Y; j++)
+                {
+                    float sum = 0;
+                    for (int k = 0; k < B; k++)
+                    {
+                        sum += m1T[i][k] * m2[k][j];
+                    }
+                    result[i][j] = sum;
+                }
+            }
+
+            return result;
+        }
     }
+}
 }

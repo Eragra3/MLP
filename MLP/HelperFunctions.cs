@@ -3,37 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace MLP
 {
     public static class HelperFunctions
     {
-        public static float[] Sigmoid(float[] input)
+        public static Vector<double> Sigmoid(Vector<double> input)
         {
-            for (int i = 0; i < input.Length; i++)
-            {
-                input[i] = 1.0f / (1.0f + (float)Math.Exp(-input[i]));
-            }
-
-            return input;
+            Vector<double> result = input.Map(x => 1.0 / (1.0 + Math.Exp(x)));
+            return result;
         }
 
-        public static float[] SigmoidPrime(float[] input)
+        public static Vector<double> SigmoidPrime(Vector<double> input)
         {
-            var sig1 = new float[input.Length];
+            var sigmoid = Sigmoid(input);
 
-            //sigmoid
-            for (int i = 0; i < input.Length; i++)
-            {
-                sig1[i] = 1.0f / (1.0f + (float)Math.Exp(-input[i]));
-            }
+            Vector<double> result = sigmoid.PointwiseMultiply(sigmoid.Map(x => 1 - x));
 
-            for (int i = 0; i < input.Length; i++)
-            {
-                input[i] = sig1[i] * (1 - 1.0f / (1.0f + (float)Math.Exp(-input[i])));
-            }
-
-            return input;
+            return result;
         }
     }
 }

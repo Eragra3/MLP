@@ -68,12 +68,48 @@ namespace MLP
             return maxIndex;
         }
 
-        public void Train(float[] inputs, int expectedSolution)
+        public void Train(float[] inputs, int[] expectedOutput)
         {
-            var solution = Compute(inputs);
+            float[][][] nablaWeights = new float[_layers.Length][][];
+            float[][] nablaBiases = new float[_layers.Length][];
+            for (int i = 0; i < _layers.Length; i++)
+            {
+                var layerWeights = _layers[i]._weights;
+                nablaWeights[i] = MatrixHelper.GetZerosMatrix(
+                    layerWeights.Length,
+                    layerWeights[0].Length
+                    );
+                nablaBiases[i] = MatrixHelper.GetZerosVector(layerWeights.Length);
+            }
 
-            
+            float[][] outputs = new float[_layers.Length][];
+            float[][] activations = new float[_layers.Length][];
+            for (int i = 0; i < _layers.Length; i++)
+            {
+                outputs[i] = _layers[i].GetOutput(inputs);
+                activations[i] = _layers[i].GetActivation(inputs);
+            }
 
+            var outputLayerIndex = _layers.Length - 1;
+            var outputDelta = new float[outputs[outputs.Length - 1].Length];
+            var outputLayerCostDerivative = SigmoidPrime(outputs[outputLayerIndex]);
+            var outputLayerOutput = outputs[outputLayerIndex];
+            for (int i = 0; i < outputDelta.Length; i++)
+            {
+                outputDelta[i] = (outputLayerOutput[i] - expectedOutput[i])
+                    * outputLayerCostDerivative[i];
+            }
+            nablaBiases[outputLayerIndex] = outputDelta;
+            nablaWeights[outputLayerIndex] = MatrixHelper.MultiplyVectors(
+                outputDelta,
+                activations[outputLayerIndex]
+                );
+
+            for (int layerIndex = _layers.Length - 2; layerIndex >= 0; layerIndex--)
+            {
+                var sigmoid_prime = Sigmoid(outputs[layerIndex]);
+                var delta = 
+            }
         }
 
         public string ToJson()
