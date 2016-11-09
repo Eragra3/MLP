@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -91,38 +92,44 @@ namespace MLP
             var layersCount = _layers.Length;
             var nablaWeights = new Matrix<double>[layersCount];
             var nablaBiases = new Vector<double>[layersCount];
-            for (int i = 0; i < _layers.Length; i++)
-            {
-                var layerWeights = _layers[i].Weights;
-                nablaBiases[i] = new DenseVector(layerWeights.RowCount);
-            }
 
             var outputs = new Vector<double>[layersCount];
             var activations = new Vector<double>[layersCount];
+            #region get outputs and activations
+            var prevActivation = inputs;
             for (int i = 0; i < _layers.Length; i++)
             {
-                var output = _layers[i].GetOutput(inputs);
+                var output = _layers[i].GetOutput(prevActivation);
                 outputs[i] = output;
-                activations[i] = _layers[i].GetActivation(output);
+                var activation = _layers[i].GetActivation(output);
+                activations[i] = activation;
+                prevActivation = activation;
             }
+            #endregion
 
+            #region get output layer nablas
             var outputLayerIndex = layersCount - 1;
-            var outputLayerOutput = outputs[outputLayerIndex];
-            var outputLayerCostDerivative = SigmoidPrime(outputLayerOutput);
+            var outputLayerWeights = _layers[outputLayerIndex].Weights;
+            var outputLayerActivation = activations[outputLayerIndex];
+            var outputLayerOutputDerivative = SigmoidPrime(outputLayerWeights.Multiply(outputs[outputLayerIndex - 1]));
 
-            var delta = outputLayerOutput
-                    .Map2((x, y) => x - y, expectedOutput)
-                    .PointwiseMultiply(outputLayerCostDerivative);
+            var delta = expectedOutput.Map2((y, a) => y - a, outputLayerActivation)
+                            .PointwiseMultiply(outputLayerOutputDerivative);
 
             nablaBiases[outputLayerIndex] = delta;
             nablaWeights[outputLayerIndex] = delta.OuterProduct(activations[outputLayerIndex]);
+            #endregion
 
             for (int layerIndex = _layers.Length - 2; layerIndex >= 0; layerIndex--)
             {
-                var sigmoidPrime = Sigmoid(outputs[layerIndex]);
-                delta = _layers[layerIndex].Weights.Transpose().Multiply(delta).PointwiseMultiply(sigmoidPrime);
+                var prevLayerOutput = layerIndex == 0 ? inputs : outputs[layerIndex - 1];
+                var nextLayerWeights = _layers[layerIndex + 1].Weights;
+                var weights = _layers[layerIndex].Weights;
+
+                var sigmoidPrime = SigmoidPrime(weights.Multiply(prevLayerOutput));
+                delta = nextLayerWeights.Transpose().Multiply(delta).PointwiseMultiply(sigmoidPrime);
                 nablaBiases[layerIndex] = delta;
-                nablaWeights[layerIndex] = delta.OuterProduct(outputs[layerIndex + 1]);
+                nablaWeights[layerIndex] = delta.OuterProduct(prevLayerOutput);
             }
 
             var result = new BackpropagationResult
@@ -143,6 +150,7 @@ namespace MLP
             var validationSet = trainingModel.ValidationSet;
             var errorTreshold = trainingModel.ErrorThreshold;
             var maxEpochs = trainingModel.MaxEpochs;
+            var isVerbose = trainingModel.IsVerbose;
 
             IList<double> epochErrors = new List<double>();
 
@@ -150,16 +158,27 @@ namespace MLP
             int epoch = 0;
 
             var layersCount = _layers.Length;
+            var lastLayerIndex = _layers.Length - 1;
             #region create nablas arrays
             var nablaWeights = new Matrix<double>[layersCount];
             var nablaBiases = new Vector<double>[layersCount];
             for (int i = 0; i < layersCount; i++)
             {
-                var layer = _layers[i];
-                nablaBiases[i] = layer.GetNewBiasesVector(true);
-                nablaWeights[i] = layer.GetNewWeightsMatrix(true);
+                var nextLayer = _layers[i];
+                nablaBiases[i] = nextLayer.GetNewBiasesVector(true);
+                nablaWeights[i] = nextLayer.GetNewWeightsMatrix(true);
             }
             #endregion
+
+            if (isVerbose)
+            {
+                Console.WriteLine("Starting with params:");
+                Console.WriteLine($"\tsizes- {_sizes}");
+                Console.WriteLine($"\tlearning rate - {_learningRate}");
+                //Console.WriteLine($"\tmomentum- {_momentum}"););
+                Console.WriteLine($"\terror threshold - {errorTreshold}");
+                Console.WriteLine($"\tmax epochs - {maxEpochs}");
+            }
 
             while (errorSum > errorTreshold && epoch < maxEpochs)
             {
@@ -170,10 +189,10 @@ namespace MLP
                 {
                     var bpResult = Backpropagate(item.Values, item.ExpectedSolution);
 
-                    for (int i = 0; i < layersCount; i++)
+                    for (int i = 0; i < layersCount - 1; i++)
                     {
-                        nablaBiases[i].Map2((nb1, nb2) => nb1 + nb2, bpResult.Biases[i]);
-                        nablaWeights[i].Map2((w1, w2) => w1 + w2, bpResult.Weights[i]);
+                        nablaBiases[i] += bpResult.Biases[i];
+                        nablaWeights[i] += bpResult.Weights[i];
                     }
 
                     var solution = bpResult.Solution;
@@ -182,10 +201,11 @@ namespace MLP
                     errorSum += solution.Map2((y, o) => Math.Pow(y - o, 2), expectedSolution).Sum();
                 }
 
+                if (isVerbose) Console.WriteLine($"Epoch - {epoch}, error - {Math.Round(errorSum, 2)}");
+
                 #region set nablas to zeroes
                 for (int i = 0; i < layersCount; i++)
                 {
-                    var layer = _layers[i];
                     nablaBiases[i].Clear();
                     nablaWeights[i].Clear();
                 }

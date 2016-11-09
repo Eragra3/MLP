@@ -9,5 +9,7 @@
         public double ErrorThreshold { get; set; }
 
         public int MaxEpochs { get; set; }
+
+        public bool IsVerbose { get; set; }
     }
 }

@@ -13,7 +13,10 @@ namespace MLP
 {
     class Program
     {
-        public const string MnistDirectory = "../../Data";
+        private const string DATA_PATH = "../../";
+        private const string TEST_DATA_PATH = DATA_PATH + "TestData";
+        private const string TRAINING_DATA_PATH = DATA_PATH + "TrainingData";
+        private const string VALIDATION_PATH = DATA_PATH + "ValidationData";
 
         static void Main(string[] args)
         {
@@ -24,8 +27,15 @@ namespace MLP
             string imagePath = "";
             bool print = false;
             bool dump = false;
-            int[] layersSizes = { 70, 15, 10 };
             bool evaluate = false;
+
+            //mlp params
+            int[] layersSizes = { 70, 15, 10 };
+            double learningRate = 0.05;
+            double momentum = 0.001;
+            double errorThreshold = 1;
+
+            int maxEpochs = 500;
 
             ICommandLine commandLine = CommandLine
                 .Help("h")
@@ -39,7 +49,11 @@ namespace MLP
                     .Option("evaluate", () => evaluate = true, "Evaluate using MNIST dataset")
                 .Command("train", () => command = Command.Train, "Train new MLP")
                     .DefaultParameter("output", path => outputPath = path, "Output file to save trained mlp")
-                    .DefaultParameter("sizes", sizes => layersSizes = JsonConvert.DeserializeObject<int[]>(sizes), "Number of layer and its sizes, default to [70,5,10]", "Sizes")
+                    .Parameter("sizes", sizes => layersSizes = JsonConvert.DeserializeObject<int[]>(sizes), "Number of layer and its sizes, default to [70,5,10]", "Sizes")
+                    .Parameter("learning-rate", val => learningRate = double.Parse(val), "Learning rate")
+                    .Parameter("momentum", val => momentum = double.Parse(val), "Momenum parameter")
+                    .Parameter("error-threshold", val => errorThreshold = double.Parse(val), "Error threshold to set learning stop criteria")
+                    .Parameter("max-epochs", val => errorThreshold = double.Parse(val), "Progra will terminate learning if reaches this epoch")
                     .Option("v", () => isVerbose = true, "Explain what is happening")
                     .Option("verbose", () => isVerbose = true, "Explain what is happening")
                 .Command("view", () => command = Command.View, "Show MNIST imag")
@@ -66,7 +80,21 @@ namespace MLP
                             return;
                         }
 
-                        var mlp = MlpTrainer.TrainOnMnist(MnistDirectory, layersSizes);
+                        var options = new MlpOptions(
+                            learningRate,
+                            momentum,
+                            errorThreshold,
+                            layersSizes,
+                            TRAINING_DATA_PATH,
+                            VALIDATION_PATH,
+                            TEST_DATA_PATH,
+                            maxEpochs,
+                            isVerbose
+                            );
+
+                        var statistics = MlpTrainer.TrainOnMnist(options);
+
+                        var mlp = statistics.TrainingResult.Mlp;
 
                         File.WriteAllText(outputPath, mlp.ToJson());
 
@@ -105,7 +133,7 @@ namespace MLP
 
                         if (evaluate)
                         {
-                            var evaluation = MlpTrainer.Evaluate(mlp, MnistDirectory);
+                            var evaluation = MlpTrainer.Evaluate(mlp, TEST_DATA_PATH);
 
                             Console.WriteLine($"Solutions - {evaluation.Correct} / {evaluation.All}");
                             Console.WriteLine($"Fitness - {evaluation.Percentage}");

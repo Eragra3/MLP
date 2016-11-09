@@ -13,18 +13,20 @@ namespace MLP
     {
         public static TrainingStatistics TrainOnMnist(MlpOptions options)
         {
+            var isVerbose = options.IsVerbose;
+
             var mlp = new Mlp(options.LearningRate, options.Momentum, options.ErrorThreshold, options.Sizes);
 
             var trainingSet = MnistParser.ReadAll(options.TrainingPath);
             var validationSet = MnistParser.ReadAll(options.ValidationPath);
-            
+
             var trainingModel = new TrainingModel
             {
                 MaxEpochs = options.MaxEpochs,
                 ErrorThreshold = options.ErrorThreshold,
-                Mlp = mlp,
                 ValidationSet = validationSet,
-                TrainingSet = trainingSet
+                TrainingSet = trainingSet,
+                IsVerbose = isVerbose
             };
 
             var trainingResult = mlp.Train(trainingModel);

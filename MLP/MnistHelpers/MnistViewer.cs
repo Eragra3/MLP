@@ -45,7 +45,7 @@ namespace MLP.MnistHelpers
             return sb.ToString();
         }
 
-        public static string Dump(MnistParser.MnistImage image)
+        public static string Dump(MnistImage image)
         {
             var sb = new StringBuilder();
 
