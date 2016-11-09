@@ -40,7 +40,6 @@ namespace MLP
                 .Command("train", () => command = Command.Train, "Train new MLP")
                     .DefaultParameter("output", path => outputPath = path, "Output file to save trained mlp")
                     .DefaultParameter("sizes", sizes => layersSizes = JsonConvert.DeserializeObject<int[]>(sizes), "Number of layer and its sizes, default to [70,5,10]", "Sizes")
-                    .DefaultParameter("input-path", path => imagePath = path, "Number of layer and its sizes, default to [70,5,10]", "Sizes")
                     .Option("v", () => isVerbose = true, "Explain what is happening")
                     .Option("verbose", () => isVerbose = true, "Explain what is happening")
                 .Command("view", () => command = Command.View, "Show MNIST imag")
@@ -98,7 +97,7 @@ namespace MLP
 
                             var image = MnistParser.ReadImage(imagePath);
 
-                            var decision = mlp.Compute(image.ValuesFloats);
+                            var decision = mlp.Compute(image.Values);
 
                             Console.WriteLine($"Result - {decision}");
                             Console.WriteLine($"Expected - {image.Label}");

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace MLP.MnistHelpers
 {
@@ -15,7 +17,7 @@ namespace MLP.MnistHelpers
             var fileName = path.Substring(path.LastIndexOfAny(FileSeparators) + 1);
             var label = int.Parse(fileName[0].ToString());
 
-            var values = new int[bitmap.Height * bitmap.Width];
+            var values = new DenseVector(bitmap.Height * bitmap.Width);
 
             for (int i = 0; i < bitmap.Height; i++)
             {
@@ -61,13 +63,11 @@ namespace MLP.MnistHelpers
 
         public class MnistImage
         {
-            public int[] Values;
+            public Vector<double> Values;
             public int Height;
             public int Width;
             public int Label;
             public string FileName;
-
-            public float[] ValuesFloats => Array.ConvertAll(Values, x => (float)x);
         }
     }
 }

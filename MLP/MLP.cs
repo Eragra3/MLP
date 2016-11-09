@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
 using Newtonsoft.Json;
 using static MLP.HelperFunctions;
 
@@ -37,9 +39,9 @@ namespace MLP
         /// </summary>
         /// <param name="inputs"></param>
         /// <returns></returns>
-        public float[] Feedforward(float[] inputs)
+        public Vector<double> Feedforward(Vector<double> inputs)
         {
-            float[] output = inputs;
+            var output = inputs;
 
             for (int i = 0; i < _layers.Length; i++)
             {
@@ -49,14 +51,14 @@ namespace MLP
             return Sigmoid(output);
         }
 
-        public int Compute(float[] inputs)
+        public int Compute(Vector<double> inputs)
         {
             var output = Feedforward(inputs);
 
             var max = output[0];
             var maxIndex = 0;
 
-            for (int i = 1; i < output.Length; i++)
+            for (int i = 1; i < output.Count; i++)
             {
                 if (output[i] > max)
                 {
@@ -68,48 +70,47 @@ namespace MLP
             return maxIndex;
         }
 
-        public void Train(float[] inputs, int[] expectedOutput)
+        public Tuple<Vector<double>[], Matrix<double>[]> Train(Vector<double> inputs, Vector<double> expectedOutput)
         {
-            float[][][] nablaWeights = new float[_layers.Length][][];
-            float[][] nablaBiases = new float[_layers.Length][];
+            var layersCount = _layers.Length;
+            var nablaWeights = new Matrix<double>[layersCount];
+            var nablaBiases = new Vector<double>[layersCount];
             for (int i = 0; i < _layers.Length; i++)
             {
                 var layerWeights = _layers[i]._weights;
-                nablaWeights[i] = MatrixHelper.GetZerosMatrix(
-                    layerWeights.Length,
-                    layerWeights[0].Length
-                    );
-                nablaBiases[i] = MatrixHelper.GetZerosVector(layerWeights.Length);
+                nablaBiases[i] = new DenseVector(layerWeights.RowCount);
             }
 
-            float[][] outputs = new float[_layers.Length][];
-            float[][] activations = new float[_layers.Length][];
+            var outputs = new Vector<double>[layersCount];
+            var activations = new Vector<double>[layersCount];
             for (int i = 0; i < _layers.Length; i++)
             {
                 outputs[i] = _layers[i].GetOutput(inputs);
                 activations[i] = _layers[i].GetActivation(inputs);
             }
 
-            var outputLayerIndex = _layers.Length - 1;
-            var outputDelta = new float[outputs[outputs.Length - 1].Length];
-            var outputLayerCostDerivative = SigmoidPrime(outputs[outputLayerIndex]);
+            var outputLayerIndex = layersCount - 1;
             var outputLayerOutput = outputs[outputLayerIndex];
-            for (int i = 0; i < outputDelta.Length; i++)
-            {
-                outputDelta[i] = (outputLayerOutput[i] - expectedOutput[i])
-                    * outputLayerCostDerivative[i];
-            }
-            nablaBiases[outputLayerIndex] = outputDelta;
-            nablaWeights[outputLayerIndex] = MatrixHelper.MultiplyVectors(
-                outputDelta,
-                activations[outputLayerIndex]
-                );
+            var outputLayerCostDerivative = SigmoidPrime(outputLayerOutput);
+
+            var delta = outputLayerOutput
+                    .Map2((x, y) => x - y, expectedOutput)
+                    .PointwiseMultiply(outputLayerCostDerivative);
+
+            nablaBiases[outputLayerIndex] = delta;
+            nablaWeights[outputLayerIndex] = delta.OuterProduct(activations[outputLayerIndex]);
 
             for (int layerIndex = _layers.Length - 2; layerIndex >= 0; layerIndex--)
             {
-                var sigmoid_prime = Sigmoid(outputs[layerIndex]);
-                var delta = 
+                var sigmoidPrime = Sigmoid(outputs[layerIndex]);
+                delta = _layers[layerIndex]._weights.Transpose().Multiply(delta).PointwiseMultiply(sigmoidPrime);
+                nablaBiases[layerIndex] = delta;
+                nablaWeights[layerIndex] = delta.OuterProduct(outputs[layerIndex + 1]);
             }
+
+            var nablas = new Tuple<Vector<double>[], Matrix<double>[]>(nablaBiases, nablaWeights);
+
+            return nablas;
         }
 
         public string ToJson()

@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MathNet.Numerics.Distributions;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using MLP.Serialization;
 using Newtonsoft.Json;
 using static MLP.HelperFunctions;
 
@@ -17,66 +20,53 @@ namespace MLP
         /// dimensions: O x I
         /// </summary>
         /// <remarks>
-        /// I == N
-        /// Input count is same as neuron count
+        /// O == N
+        /// Output count is same as neuron count
         /// </remarks>
         [JsonProperty]
-        private Matrix<double> _weights;
+        [JsonConverter(typeof(DenseMatrixConverter))]
+        public DenseMatrix _weights;
 
         /// <summary>
         /// Vector
-        /// dimensions: I
+        /// dimensions: O x 1
         /// </summary>
         [JsonProperty]
-        private Vector<double> _biases;
+        [JsonConverter(typeof(DenseVectorConverter))]
+        public DenseVector _biases;
 
+        [JsonConstructor]
+        private Layer() { }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="inputsCount">Number of inputs to each vector</param>
+        /// <param name="outputsCount">Same as neuron count in this layer</param>
         public Layer(int inputsCount, int outputsCount)
         {
-            _weights = new DenseMatrix(outputsCount, inputsCount);
-            _biases = new DenseVector(inputsCount);
+            _weights = DenseMatrix.CreateRandom(outputsCount, inputsCount, new ContinuousUniform());
+            _biases = DenseVector.CreateRandom(outputsCount, new ContinuousUniform());
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="inputs">Vector dimensions: I</param>
+        /// <param name="inputs">Vector dimensions: I x 1</param>
         /// <returns></returns>
         public Vector<double> Feedforward(Vector<double> inputs)
         {
-            var I = _weights.ColumnCount;
-            var O = _weights.RowCount;
+            var output = GetOutput(inputs);
 
-            var output = new DenseVector(O);
-            for (int i = 0; i < O; i++)
-            {
-                var neuronWeights = _weights.Column(i);
-                var neuronBias = _biases[i];
-
-                for (int j = 0; j < I; j++)
-                {
-                    output[i] += inputs[j] * neuronWeights[j] + neuronBias;
-                }
-            }
-
-            return Sigmoid(output);
+            return GetActivation(output);
         }
 
         public Vector<double> GetOutput(Vector<double> inputs)
         {
-            var I = _weights.ColumnCount;
-            var O = _weights.RowCount;
+            //O x I * I x 1 = O x 1
+            //O x 1 o O x 1 = O x 1
+            var output = _weights.Multiply(inputs).Map2((w, b) => w + b, _biases);
 
-            var output = new DenseVector(O);
-            for (int i = 0; i < O; i++)
-            {
-                var neuronWeights = _weights.Column(i);
-                var neuronBias = _biases[i];
-
-                for (int j = 0; j < I; j++)
-                {
-                    output[i] += inputs[j] * neuronWeights[j] + neuronBias;
-                }
-            }
             return output;
         }
 

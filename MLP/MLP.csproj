@@ -55,9 +55,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Serialization\DenseMatrixConverter.cs" />
+    <Compile Include="Serialization\DenseMatrixSerializationModel.cs" />
+    <Compile Include="Serialization\DenseVectorConverter.cs" />
     <Compile Include="MLPTrainer.cs" />
     <Compile Include="MnistHelpers\MnistParser.cs" />
-    <Compile Include="MatrixHelper.cs" />
     <Compile Include="Cmd\Command.cs" />
     <Compile Include="Extensions\RandomExtensions.cs" />
     <Compile Include="HelperFunctions.cs" />
