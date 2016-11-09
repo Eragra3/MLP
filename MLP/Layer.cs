@@ -24,16 +24,16 @@ namespace MLP
         /// Output count is same as neuron count
         /// </remarks>
         [JsonProperty]
-        [JsonConverter(typeof(DenseMatrixConverter))]
-        public DenseMatrix Weights;
+        [JsonConverter(typeof(MatrixConverter))]
+        public Matrix<double> Weights;
 
         /// <summary>
         /// Vector
         /// dimensions: O x 1
         /// </summary>
         [JsonProperty]
-        [JsonConverter(typeof(DenseVectorConverter))]
-        public DenseVector Biases;
+        [JsonConverter(typeof(VectorConverter))]
+        public Vector<double> Biases;
 
         private int _inputsCount;
         private int _neuronsCount;
@@ -55,13 +55,13 @@ namespace MLP
             Biases = GetNewBiasesVector();
         }
 
-        public DenseMatrix GetNewWeightsMatrix(bool allZeroes = false)
+        public Matrix GetNewWeightsMatrix(bool allZeroes = false)
         {
             if (allZeroes) return new DenseMatrix(_neuronsCount, _inputsCount);
             return DenseMatrix.CreateRandom(_neuronsCount, _inputsCount, new ContinuousUniform());
         }
 
-        public DenseVector GetNewBiasesVector(bool allZeroes = false)
+        public Vector GetNewBiasesVector(bool allZeroes = false)
         {
             if (allZeroes) return new DenseVector(_neuronsCount);
             return DenseVector.CreateRandom(_neuronsCount, new ContinuousUniform());

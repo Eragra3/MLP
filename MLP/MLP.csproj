@@ -58,11 +58,12 @@
     <Compile Include="BackpropagationResult.cs" />
     <Compile Include="InputModels.cs" />
     <Compile Include="MLPOptions.cs" />
+    <Compile Include="Serialization\VectorSerializationModel.cs" />
     <Compile Include="TrainingModel.cs" />
     <Compile Include="TrainingResult.cs" />
-    <Compile Include="Serialization\DenseMatrixConverter.cs" />
-    <Compile Include="Serialization\DenseMatrixSerializationModel.cs" />
-    <Compile Include="Serialization\DenseVectorConverter.cs" />
+    <Compile Include="Serialization\MatrixConverter.cs" />
+    <Compile Include="Serialization\MatrixSerializationModel.cs" />
+    <Compile Include="Serialization\VectorConverter.cs" />
     <Compile Include="MLPTrainer.cs" />
     <Compile Include="MnistHelpers\MnistParser.cs" />
     <Compile Include="Cmd\Command.cs" />

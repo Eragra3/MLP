@@ -53,7 +53,7 @@ namespace MLP
                     .Parameter("learning-rate", val => learningRate = double.Parse(val), "Learning rate")
                     .Parameter("momentum", val => momentum = double.Parse(val), "Momenum parameter")
                     .Parameter("error-threshold", val => errorThreshold = double.Parse(val), "Error threshold to set learning stop criteria")
-                    .Parameter("max-epochs", val => errorThreshold = double.Parse(val), "Progra will terminate learning if reaches this epoch")
+                    .Parameter("max-epochs", val => maxEpochs = int.Parse(val), "Progra will terminate learning if reaches this epoch")
                     .Option("v", () => isVerbose = true, "Explain what is happening")
                     .Option("verbose", () => isVerbose = true, "Explain what is happening")
                 .Command("view", () => command = Command.View, "Show MNIST imag")

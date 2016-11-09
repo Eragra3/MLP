@@ -7,7 +7,7 @@ using MathNet.Numerics.LinearAlgebra.Storage;
 
 namespace MLP.Serialization
 {
-    public class DenseMatrixSerializationModel
+    public class MatrixSerializationModel
     {
         public double[] Storage { get; set; }
 
@@ -15,6 +15,8 @@ namespace MLP.Serialization
 
         public int RowCount { get; set; }
 
-        public DenseMatrixSerializationModel() { }
+        public bool IsDense { get; set; }
+
+        public MatrixSerializationModel() { }
     }
 }
