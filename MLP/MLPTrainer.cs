@@ -4,20 +4,40 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MathNet.Numerics.LinearAlgebra;
 using MLP.MnistHelpers;
 
 namespace MLP
 {
-    public static class MLPTrainer
+    public static class MlpTrainer
     {
-        public static MLP TrainOnMnist(string pathToDirectory, params int[] sizes)
+        public static TrainingStatistics TrainOnMnist(MlpOptions options)
         {
-            var mlp = new MLP(sizes);
+            var mlp = new Mlp(options.LearningRate, options.Momentum, options.ErrorThreshold, options.Sizes);
 
-            return mlp;
+            var trainingSet = MnistParser.ReadAll(options.TrainingPath);
+            var validationSet = MnistParser.ReadAll(options.ValidationPath);
+            
+            var trainingModel = new TrainingModel
+            {
+                MaxEpochs = options.MaxEpochs,
+                ErrorThreshold = options.ErrorThreshold,
+                Mlp = mlp,
+                ValidationSet = validationSet,
+                TrainingSet = trainingSet
+            };
+
+            var trainingResult = mlp.Train(trainingModel);
+
+            var statistics = new TrainingStatistics
+            {
+                TrainingResult = trainingResult
+            };
+
+            return statistics;
         }
 
-        public static MLPEvaluationModel Evaluate(MLP mlp, string pathToDirectory)
+        public static MlpEvaluationModel Evaluate(Mlp mlp, string pathToDirectory)
         {
             var testData = MnistParser.ReadAll(pathToDirectory);
 
@@ -32,7 +52,7 @@ namespace MLP
                 if (decision == model.Label) correctSolutions++;
             }
 
-            var result = new MLPEvaluationModel
+            var result = new MlpEvaluationModel
             {
                 Correct = correctSolutions,
                 All = testData.Length
@@ -41,10 +61,11 @@ namespace MLP
             return result;
         }
 
-        public struct MLPEvaluationModel
+        public class MlpEvaluationModel
         {
-            public int Correct;
-            public int All;
+            public int All { get; set; }
+            public int Correct { get; set; }
+
             public int Incorrect => All - Correct;
             public double Percentage => Math.Round((double)Correct / All, 2);
         }

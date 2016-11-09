@@ -55,6 +55,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BackpropagationResult.cs" />
+    <Compile Include="InputModels.cs" />
+    <Compile Include="MLPOptions.cs" />
+    <Compile Include="TrainingModel.cs" />
+    <Compile Include="TrainingResult.cs" />
     <Compile Include="Serialization\DenseMatrixConverter.cs" />
     <Compile Include="Serialization\DenseMatrixSerializationModel.cs" />
     <Compile Include="Serialization\DenseVectorConverter.cs" />
@@ -68,6 +73,7 @@
     <Compile Include="MnistHelpers\MnistViewer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TrainingStatistics.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

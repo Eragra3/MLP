@@ -25,7 +25,7 @@ namespace MLP
         /// </remarks>
         [JsonProperty]
         [JsonConverter(typeof(DenseMatrixConverter))]
-        public DenseMatrix _weights;
+        public DenseMatrix Weights;
 
         /// <summary>
         /// Vector
@@ -33,7 +33,10 @@ namespace MLP
         /// </summary>
         [JsonProperty]
         [JsonConverter(typeof(DenseVectorConverter))]
-        public DenseVector _biases;
+        public DenseVector Biases;
+
+        private int _inputsCount;
+        private int _neuronsCount;
 
         [JsonConstructor]
         private Layer() { }
@@ -45,8 +48,23 @@ namespace MLP
         /// <param name="outputsCount">Same as neuron count in this layer</param>
         public Layer(int inputsCount, int outputsCount)
         {
-            _weights = DenseMatrix.CreateRandom(outputsCount, inputsCount, new ContinuousUniform());
-            _biases = DenseVector.CreateRandom(outputsCount, new ContinuousUniform());
+            _inputsCount = inputsCount;
+            _neuronsCount = outputsCount;
+
+            Weights = GetNewWeightsMatrix();
+            Biases = GetNewBiasesVector();
+        }
+
+        public DenseMatrix GetNewWeightsMatrix(bool allZeroes = false)
+        {
+            if (allZeroes) return new DenseMatrix(_neuronsCount, _inputsCount);
+            return DenseMatrix.CreateRandom(_neuronsCount, _inputsCount, new ContinuousUniform());
+        }
+
+        public DenseVector GetNewBiasesVector(bool allZeroes = false)
+        {
+            if (allZeroes) return new DenseVector(_neuronsCount);
+            return DenseVector.CreateRandom(_neuronsCount, new ContinuousUniform());
         }
 
         /// <summary>
@@ -65,11 +83,16 @@ namespace MLP
         {
             //O x I * I x 1 = O x 1
             //O x 1 o O x 1 = O x 1
-            var output = _weights.Multiply(inputs).Map2((w, b) => w + b, _biases);
+            var output = Weights.Multiply(inputs).Map2((w, b) => w + b, Biases);
 
             return output;
         }
 
+        /// <summary>
+        /// Takes net as input (this layer output before activation function)
+        /// </summary>
+        /// <param name="output"></param>
+        /// <returns></returns>
         public Vector<double> GetActivation(Vector<double> output)
         {
             return Sigmoid(output);

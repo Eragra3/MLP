@@ -66,7 +66,7 @@ namespace MLP
                             return;
                         }
 
-                        var mlp = MLPTrainer.TrainOnMnist(MnistDirectory, layersSizes);
+                        var mlp = MlpTrainer.TrainOnMnist(MnistDirectory, layersSizes);
 
                         File.WriteAllText(outputPath, mlp.ToJson());
 
@@ -74,11 +74,11 @@ namespace MLP
                     }
                 case Command.Test:
                     {
-                        MLP mlp;
+                        Mlp mlp;
                         try
                         {
                             var json = File.ReadAllText(nnJsonPath);
-                            mlp = JsonConvert.DeserializeObject<MLP>(json);
+                            mlp = JsonConvert.DeserializeObject<Mlp>(json);
                         }
                         catch (Exception e)
                         {
@@ -105,7 +105,7 @@ namespace MLP
 
                         if (evaluate)
                         {
-                            var evaluation = MLPTrainer.Evaluate(mlp, MnistDirectory);
+                            var evaluation = MlpTrainer.Evaluate(mlp, MnistDirectory);
 
                             Console.WriteLine($"Solutions - {evaluation.Correct} / {evaluation.All}");
                             Console.WriteLine($"Fitness - {evaluation.Percentage}");

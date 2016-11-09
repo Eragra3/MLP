@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using MLP.MnistHelpers;
 using Newtonsoft.Json;
 using static MLP.HelperFunctions;
 
 namespace MLP
 {
-    public class MLP
+    public class Mlp
     {
         [JsonProperty]
         private Layer[] _layers;
@@ -18,13 +19,28 @@ namespace MLP
         [JsonProperty]
         private int[] _sizes;
 
+        [JsonProperty]
+        private double _learningRate;
+
+        [JsonProperty]
+        private double _momentum;
+
+        [JsonProperty]
+        private double _errorThreshold;
+
         /// <summary>
         /// Should only be used to create deserialized object
         /// </summary>
-        public MLP() { }
-
-        public MLP(params int[] sizes)
+        public Mlp()
         {
+
+        }
+
+        public Mlp(double learningRate, double momentum, double errorThreshold, params int[] sizes)
+        {
+            _learningRate = learningRate;
+            _momentum = momentum;
+            _errorThreshold = errorThreshold;
             _sizes = sizes;
             _layers = new Layer[sizes.Length - 1];
 
@@ -70,14 +86,14 @@ namespace MLP
             return maxIndex;
         }
 
-        public Tuple<Vector<double>[], Matrix<double>[]> Train(Vector<double> inputs, Vector<double> expectedOutput)
+        public BackpropagationResult Backpropagate(Vector<double> inputs, Vector<double> expectedOutput)
         {
             var layersCount = _layers.Length;
             var nablaWeights = new Matrix<double>[layersCount];
             var nablaBiases = new Vector<double>[layersCount];
             for (int i = 0; i < _layers.Length; i++)
             {
-                var layerWeights = _layers[i]._weights;
+                var layerWeights = _layers[i].Weights;
                 nablaBiases[i] = new DenseVector(layerWeights.RowCount);
             }
 
@@ -85,8 +101,9 @@ namespace MLP
             var activations = new Vector<double>[layersCount];
             for (int i = 0; i < _layers.Length; i++)
             {
-                outputs[i] = _layers[i].GetOutput(inputs);
-                activations[i] = _layers[i].GetActivation(inputs);
+                var output = _layers[i].GetOutput(inputs);
+                outputs[i] = output;
+                activations[i] = _layers[i].GetActivation(output);
             }
 
             var outputLayerIndex = layersCount - 1;
@@ -103,14 +120,88 @@ namespace MLP
             for (int layerIndex = _layers.Length - 2; layerIndex >= 0; layerIndex--)
             {
                 var sigmoidPrime = Sigmoid(outputs[layerIndex]);
-                delta = _layers[layerIndex]._weights.Transpose().Multiply(delta).PointwiseMultiply(sigmoidPrime);
+                delta = _layers[layerIndex].Weights.Transpose().Multiply(delta).PointwiseMultiply(sigmoidPrime);
                 nablaBiases[layerIndex] = delta;
                 nablaWeights[layerIndex] = delta.OuterProduct(outputs[layerIndex + 1]);
             }
 
-            var nablas = new Tuple<Vector<double>[], Matrix<double>[]>(nablaBiases, nablaWeights);
+            var result = new BackpropagationResult
+            {
+                Biases = nablaBiases,
+                Weights = nablaWeights,
+                Input = inputs,
+                Solution = activations.Last()
+            };
 
-            return nablas;
+            return result;
+        }
+
+
+        public TrainingResult Train(TrainingModel trainingModel)
+        {
+            var trainingSet = trainingModel.TrainingSet;
+            var validationSet = trainingModel.ValidationSet;
+            var errorTreshold = trainingModel.ErrorThreshold;
+            var maxEpochs = trainingModel.MaxEpochs;
+
+            IList<double> epochErrors = new List<double>();
+
+            double errorSum = double.PositiveInfinity;
+            int epoch = 0;
+
+            var layersCount = _layers.Length;
+            #region create nablas arrays
+            var nablaWeights = new Matrix<double>[layersCount];
+            var nablaBiases = new Vector<double>[layersCount];
+            for (int i = 0; i < layersCount; i++)
+            {
+                var layer = _layers[i];
+                nablaBiases[i] = layer.GetNewBiasesVector(true);
+                nablaWeights[i] = layer.GetNewWeightsMatrix(true);
+            }
+            #endregion
+
+            while (errorSum > errorTreshold && epoch < maxEpochs)
+            {
+                epoch++;
+                errorSum = 0;
+
+                foreach (var item in trainingSet)
+                {
+                    var bpResult = Backpropagate(item.Values, item.ExpectedSolution);
+
+                    for (int i = 0; i < layersCount; i++)
+                    {
+                        nablaBiases[i].Map2((nb1, nb2) => nb1 + nb2, bpResult.Biases[i]);
+                        nablaWeights[i].Map2((w1, w2) => w1 + w2, bpResult.Weights[i]);
+                    }
+
+                    var solution = bpResult.Solution;
+                    var expectedSolution = item.ExpectedSolution;
+
+                    errorSum += solution.Map2((y, o) => Math.Pow(y - o, 2), expectedSolution).Sum();
+                }
+
+                #region set nablas to zeroes
+                for (int i = 0; i < layersCount; i++)
+                {
+                    var layer = _layers[i];
+                    nablaBiases[i].Clear();
+                    nablaWeights[i].Clear();
+                }
+                #endregion
+
+                epochErrors.Add(errorSum);
+            }
+
+            var trainingResult = new TrainingResult
+            {
+                Mlp = this,
+                Epochs = epoch,
+                EpochErrors = epochErrors.ToArray()
+            };
+
+            return trainingResult;
         }
 
         public string ToJson()
@@ -118,9 +209,9 @@ namespace MLP
             return JsonConvert.SerializeObject(this, Formatting.Indented);
         }
 
-        public static MLP FromJson(string json)
+        public static Mlp FromJson(string json)
         {
-            return JsonConvert.DeserializeObject<MLP>(json);
+            return JsonConvert.DeserializeObject<Mlp>(json);
         }
     }
 }

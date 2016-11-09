@@ -33,13 +33,16 @@ namespace MLP.MnistHelpers
                 }
             }
 
+            var solution = new SparseVector(10) { [label] = 1 };
+
             var image = new MnistImage
             {
                 Width = bitmap.Width,
                 Height = bitmap.Height,
                 Values = values,
                 FileName = fileName,
-                Label = label
+                Label = label,
+                ExpectedSolution = solution
             };
 
             return image;
@@ -59,15 +62,6 @@ namespace MLP.MnistHelpers
             }
 
             return models;
-        }
-
-        public class MnistImage
-        {
-            public Vector<double> Values;
-            public int Height;
-            public int Width;
-            public int Label;
-            public string FileName;
         }
     }
 }
