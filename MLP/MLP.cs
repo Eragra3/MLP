@@ -159,7 +159,6 @@ namespace MLP
             int epoch = 0;
 
             var layersCount = _layers.Length;
-            var lastLayerIndex = _layers.Length - 1;
             #region create nablas arrays
             var nablaWeights = new Matrix<double>[layersCount];
             var nablaBiases = new Vector<double>[layersCount];
@@ -174,7 +173,7 @@ namespace MLP
             if (isVerbose)
             {
                 Console.WriteLine("Starting with params:");
-                Console.WriteLine($"\tsizes- {_sizes}");
+                Console.WriteLine($"\tsizes- {JsonConvert.SerializeObject(_sizes)}");
                 Console.WriteLine($"\tlearning rate - {_learningRate}");
                 //Console.WriteLine($"\tmomentum- {_momentum}"););
                 Console.WriteLine($"\terror threshold - {errorTreshold}");
