@@ -201,6 +201,17 @@ namespace MLP
                     errorSum += solution.Map2((y, o) => Math.Pow(y - o, 2), expectedSolution).Sum();
                 }
 
+                #region update parameters
+                for (int i = 0; i < layersCount; i++)
+                {
+                    var weightsChange = _learningRate * ((1.0 / trainingSet.Length) * nablaWeights[i]);
+                    _layers[i].Weights.Subtract(weightsChange, _layers[i].Weights);
+                    var biasesChange = _learningRate * ((1.0 / trainingSet.Length) * nablaBiases[i]);
+                    _layers[i].Biases.Subtract(biasesChange, _layers[i].Biases);
+                }
+                #endregion
+
+
                 if (isVerbose) Console.WriteLine($"Epoch - {epoch}, error - {Math.Round(errorSum, 2)}");
 
                 #region set nablas to zeroes
