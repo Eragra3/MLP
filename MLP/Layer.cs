@@ -25,7 +25,7 @@ namespace MLP
         /// </remarks>
         [JsonProperty]
         [JsonConverter(typeof(MatrixConverter))]
-        public Matrix<double> Weights;
+        public readonly Matrix<double> Weights;
 
         /// <summary>
         /// Vector
@@ -33,10 +33,12 @@ namespace MLP
         /// </summary>
         [JsonProperty]
         [JsonConverter(typeof(VectorConverter))]
-        public Vector<double> Biases;
+        public readonly Vector<double> Biases;
 
-        private int _inputsCount;
-        private int _neuronsCount;
+        private readonly int _inputsCount;
+        private readonly int _neuronsCount;
+
+        private readonly IContinuousDistribution _continuousUniform = new ContinuousUniform(-0.5, 0.5);
 
         [JsonConstructor]
         private Layer() { }
@@ -58,13 +60,13 @@ namespace MLP
         public Matrix GetNewWeightsMatrix(bool allZeroes = false)
         {
             if (allZeroes) return new DenseMatrix(_neuronsCount, _inputsCount);
-            return DenseMatrix.CreateRandom(_neuronsCount, _inputsCount, new ContinuousUniform());
+            return DenseMatrix.CreateRandom(_neuronsCount, _inputsCount, _continuousUniform);
         }
 
         public Vector GetNewBiasesVector(bool allZeroes = false)
         {
             if (allZeroes) return new DenseVector(_neuronsCount);
-            return DenseVector.CreateRandom(_neuronsCount, new ContinuousUniform());
+            return DenseVector.CreateRandom(_neuronsCount, _continuousUniform);
         }
 
         /// <summary>

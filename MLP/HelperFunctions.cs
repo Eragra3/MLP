@@ -11,7 +11,7 @@ namespace MLP
     {
         public static Vector<double> Sigmoid(Vector<double> input)
         {
-            var result = input.Map(x => 1.0 / (1.0 + Math.Exp(x)));
+            var result = input.Map(x => 1.0 / (1.0 + Math.Exp(-x)));
             return result;
         }
 

@@ -111,25 +111,26 @@ namespace MLP
             var outputLayerIndex = layersCount - 1;
             var outputLayerWeights = _layers[outputLayerIndex].Weights;
             var outputLayerActivation = activations[outputLayerIndex];
-            var outputLayerOutputDerivative = SigmoidPrime(outputLayerWeights.Multiply(outputs[outputLayerIndex - 1]));
 
-            var delta = expectedOutput.Map2((y, a) => y - a, outputLayerActivation)
+            var outputLayerOutputDerivative = SigmoidPrime(outputLayerWeights.Multiply(activations[outputLayerIndex - 1]));
+
+            var delta = outputLayerActivation.Map2((y, a) => y - a, expectedOutput)
                             .PointwiseMultiply(outputLayerOutputDerivative);
 
             nablaBiases[outputLayerIndex] = delta;
-            nablaWeights[outputLayerIndex] = delta.OuterProduct(activations[outputLayerIndex]);
+            nablaWeights[outputLayerIndex] = delta.OuterProduct(activations[outputLayerIndex - 1]);
             #endregion
 
             for (int layerIndex = _layers.Length - 2; layerIndex >= 0; layerIndex--)
             {
-                var prevLayerOutput = layerIndex == 0 ? inputs : outputs[layerIndex - 1];
+                var prevLayerActivation = layerIndex == 0 ? inputs : activations[layerIndex - 1];
                 var nextLayerWeights = _layers[layerIndex + 1].Weights;
                 var weights = _layers[layerIndex].Weights;
 
-                var sigmoidPrime = SigmoidPrime(weights.Multiply(prevLayerOutput));
+                var sigmoidPrime = SigmoidPrime(weights.Multiply(prevLayerActivation));
                 delta = nextLayerWeights.Transpose().Multiply(delta).PointwiseMultiply(sigmoidPrime);
                 nablaBiases[layerIndex] = delta;
-                nablaWeights[layerIndex] = delta.OuterProduct(prevLayerOutput);
+                nablaWeights[layerIndex] = delta.OuterProduct(prevLayerActivation);
             }
 
             var result = new BackpropagationResult

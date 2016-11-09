@@ -31,11 +31,11 @@ namespace MLP
 
             //mlp params
             int[] layersSizes = { 70, 15, 10 };
-            double learningRate = 0.05;
+            double learningRate = 0.25;
             double momentum = 0.001;
             double errorThreshold = 1;
 
-            int maxEpochs = 500;
+            int maxEpochs = 100;
 
             ICommandLine commandLine = CommandLine
                 .Help("h")

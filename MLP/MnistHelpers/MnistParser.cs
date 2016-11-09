@@ -29,7 +29,7 @@ namespace MLP.MnistHelpers
 
                         var grayscale = (color.R + color.G + color.B) / 3;
 
-                        values[j + i * bitmap.Width] = grayscale;
+                        values[j + i * bitmap.Width] = grayscale / 255.0;
                     }
                 }
             }
