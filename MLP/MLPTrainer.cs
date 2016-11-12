@@ -39,10 +39,8 @@ namespace MLP
             return statistics;
         }
 
-        public static MlpEvaluationModel Evaluate(Mlp mlp, string pathToDirectory)
+        public static MlpEvaluationModel Evaluate(Mlp mlp, InputModel[] testData)
         {
-            var testData = MnistParser.ReadAll(pathToDirectory);
-
             var correctSolutions = 0;
 
             for (int i = 0; i < testData.Length; i++)

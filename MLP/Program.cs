@@ -35,7 +35,7 @@ namespace MLP
             double momentum = 0.001;
             double errorThreshold = 1;
 
-            int maxEpochs = 100;
+            int maxEpochs = 50;
 
             ICommandLine commandLine = CommandLine
                 .Help("h")
@@ -133,7 +133,9 @@ namespace MLP
 
                         if (evaluate)
                         {
-                            var evaluation = MlpTrainer.Evaluate(mlp, TEST_DATA_PATH);
+                            var testData = MnistParser.ReadAll(TEST_DATA_PATH);
+
+                            var evaluation = MlpTrainer.Evaluate(mlp, testData);
 
                             Console.WriteLine($"Solutions - {evaluation.Correct} / {evaluation.All}");
                             Console.WriteLine($"Fitness - {evaluation.Percentage}");

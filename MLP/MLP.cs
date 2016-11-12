@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using MathNet.Numerics.LinearRegression;
 using MLP.MnistHelpers;
 using Newtonsoft.Json;
 using static MLP.HelperFunctions;
@@ -47,7 +48,7 @@ namespace MLP
 
             for (int i = 0; i < sizes.Length - 1; i++)
             {
-                _layers[i] = new Layer(sizes[i], sizes[i + 1]);
+                _layers[i] = new Layer(sizes[i], sizes[i + 1], i == sizes.Length - 1);
             }
         }
 
@@ -111,11 +112,11 @@ namespace MLP
             var outputLayerIndex = layersCount - 1;
             var outputLayerWeights = _layers[outputLayerIndex].Weights;
             var outputLayerActivation = activations[outputLayerIndex];
+            var outputLayerOutput = outputs[outputLayerIndex];
 
-            var outputLayerOutputDerivative = SigmoidPrime(outputLayerWeights.Multiply(activations[outputLayerIndex - 1]));
+            var outputLayerOutputDerivative = SigmoidPrime(outputLayerOutput);
 
-            var delta = outputLayerActivation.Map2((y, a) => y - a, expectedOutput)
-                            .PointwiseMultiply(outputLayerOutputDerivative);
+            var delta = (outputLayerActivation - expectedOutput).PointwiseMultiply(outputLayerOutputDerivative);
 
             nablaBiases[outputLayerIndex] = delta;
             nablaWeights[outputLayerIndex] = delta.OuterProduct(activations[outputLayerIndex - 1]);
@@ -123,11 +124,11 @@ namespace MLP
 
             for (int layerIndex = _layers.Length - 2; layerIndex >= 0; layerIndex--)
             {
-                var prevLayerActivation = layerIndex == 0 ? inputs : activations[layerIndex - 1];
+                var output = outputs[layerIndex];
+                var sigmoidPrime = SigmoidPrime(output);
                 var nextLayerWeights = _layers[layerIndex + 1].Weights;
-                var weights = _layers[layerIndex].Weights;
+                var prevLayerActivation = layerIndex == 0 ? inputs : activations[layerIndex - 1];
 
-                var sigmoidPrime = SigmoidPrime(weights.Multiply(prevLayerActivation));
                 delta = nextLayerWeights.Transpose().Multiply(delta).PointwiseMultiply(sigmoidPrime);
                 nablaBiases[layerIndex] = delta;
                 nablaWeights[layerIndex] = delta.OuterProduct(prevLayerActivation);
@@ -180,12 +181,14 @@ namespace MLP
                 Console.WriteLine($"\tmax epochs - {maxEpochs}");
             }
 
+            //Debugger.Launch();
+
             while (errorSum > errorTreshold && epoch < maxEpochs)
             {
                 epoch++;
                 errorSum = 0;
 
-                foreach (var item in trainingSet)
+                foreach (var item in RandomPermutation(trainingSet))
                 {
                     var bpResult = Backpropagate(item.Values, item.ExpectedSolution);
 
@@ -201,18 +204,31 @@ namespace MLP
                     errorSum += solution.Map2((y, o) => Math.Pow(y - o, 2), expectedSolution).Sum();
                 }
 
+                //Console.WriteLine(nablaWeights[0].ToString(nablaWeights[0].RowCount, nablaWeights[0].ColumnCount));
+                //Console.WriteLine(_layers[0].Weights.ToString());
+                //Console.WriteLine("-".PadLeft(80,'*'));
+
                 #region update parameters
                 for (int i = 0; i < layersCount; i++)
                 {
-                    var weightsChange = _learningRate * ((1.0 / trainingSet.Length) * nablaWeights[i]);
-                    _layers[i].Weights.Subtract(weightsChange, _layers[i].Weights);
-                    var biasesChange = _learningRate * ((1.0 / trainingSet.Length) * nablaBiases[i]);
-                    _layers[i].Biases.Subtract(biasesChange, _layers[i].Biases);
+                    var weights = _layers[i].Weights;
+                    var weightsChange = _learningRate * nablaWeights[i];
+                    weights.Subtract(weightsChange, weights);
+
+                    var biases = _layers[i].Biases;
+                    var biasesChange = _learningRate * nablaBiases[i];
+                    biases.Subtract(biasesChange, biases);
                 }
                 #endregion
 
 
-                if (isVerbose) Console.WriteLine($"Epoch - {epoch}, error - {Math.Round(errorSum, 2)}");
+                if (isVerbose)
+                {
+                    var lastEpochError = epochErrors.LastOrDefault();
+                    Console.WriteLine($"Epoch - {epoch}," +
+                                      $" error - {Math.Round(errorSum, 2)}, " +
+                                      $"change - {Math.Round(lastEpochError - errorSum, 2)}");
+                }
 
                 #region set nablas to zeroes
                 for (int i = 0; i < layersCount; i++)

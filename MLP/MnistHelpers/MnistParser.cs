@@ -34,7 +34,8 @@ namespace MLP.MnistHelpers
                 }
             }
 
-            var solution = new SparseVector(10) { [label] = 1 };
+            var solution = new SparseVector(10);
+            solution[label] = 1;
 
             var image = new MnistImage
             {

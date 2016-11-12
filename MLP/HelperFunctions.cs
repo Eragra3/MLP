@@ -9,6 +9,8 @@ namespace MLP
 {
     public static class HelperFunctions
     {
+        private static readonly Random Random = new Random();
+
         public static Vector<double> Sigmoid(Vector<double> input)
         {
             var result = input.Map(x => 1.0 / (1.0 + Math.Exp(-x)));
@@ -19,9 +21,26 @@ namespace MLP
         {
             var sigmoid = Sigmoid(input);
 
-            var result = sigmoid.PointwiseMultiply(sigmoid.Map(x => 1 - x));
+            var result = sigmoid.PointwiseMultiply(sigmoid.Map(x => 1 - x, Zeros.Include));
 
             return result;
+        }
+
+        public static T[] RandomPermutation<T>(IEnumerable<T> sequence)
+        {
+            var retArray = sequence.ToArray();
+
+
+            for (var i = 0; i < retArray.Length - 1; i += 1)
+            {
+                var swapIndex = Random.Next(i, retArray.Length);
+                if (swapIndex == i) continue;
+                var temp = retArray[i];
+                retArray[i] = retArray[swapIndex];
+                retArray[swapIndex] = temp;
+            }
+
+            return retArray;
         }
     }
 }
