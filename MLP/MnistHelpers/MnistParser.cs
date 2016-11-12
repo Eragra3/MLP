@@ -27,9 +27,9 @@ namespace MLP.MnistHelpers
                     {
                         var color = bitmap.GetPixel(j, i);
 
-                        var grayscale = (color.R + color.G + color.B) / 3;
+                        int gray = (int)(color.R * 0.2126 + color.G * 0.7152 + color.B * 0.0722);
 
-                        values[j + i * bitmap.Width] = grayscale / 255.0;
+                        values[j + i * bitmap.Width] = 1 - gray / 255.0;
                     }
                 }
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace MLP
     {
         private const string DATA_PATH = "../../";
         private const string TEST_DATA_PATH = DATA_PATH + "TestData";
-        private const string TRAINING_DATA_PATH = DATA_PATH + "TrainingData";
+        private const string TRAINING_DATA_PATH = DATA_PATH + "TestData";
         private const string VALIDATION_PATH = DATA_PATH + "ValidationData";
 
         static void Main(string[] args)
@@ -28,6 +29,7 @@ namespace MLP
             bool print = false;
             bool dump = false;
             bool evaluate = false;
+            int batchSize = 20;
 
             //mlp params
             int[] layersSizes = { 70, 15, 10 };
@@ -50,10 +52,11 @@ namespace MLP
                 .Command("train", () => command = Command.Train, "Train new MLP")
                     .DefaultParameter("output", path => outputPath = path, "Output file to save trained mlp")
                     .Parameter("sizes", sizes => layersSizes = JsonConvert.DeserializeObject<int[]>(sizes), "Number of layer and its sizes, default to [70,5,10]", "Sizes")
-                    .Parameter("learning-rate", val => learningRate = double.Parse(val), "Learning rate")
+                    .Parameter("learning-rate", val => learningRate = double.Parse(val, CultureInfo.InvariantCulture), "Learning rate")
                     .Parameter("momentum", val => momentum = double.Parse(val), "Momenum parameter")
                     .Parameter("error-threshold", val => errorThreshold = double.Parse(val), "Error threshold to set learning stop criteria")
-                    .Parameter("max-epochs", val => maxEpochs = int.Parse(val), "Progra will terminate learning if reaches this epoch")
+                    .Parameter("max-epochs", val => maxEpochs = int.Parse(val), "Program will terminate learning if reaches this epoch")
+                    .Parameter("batch-size", val => batchSize = int.Parse(val), "Batch size")
                     .Option("v", () => isVerbose = true, "Explain what is happening")
                     .Option("verbose", () => isVerbose = true, "Explain what is happening")
                 .Command("view", () => command = Command.View, "Show MNIST imag")
@@ -89,7 +92,8 @@ namespace MLP
                             VALIDATION_PATH,
                             TEST_DATA_PATH,
                             maxEpochs,
-                            isVerbose
+                            isVerbose,
+                            batchSize
                             );
 
                         var statistics = MlpTrainer.TrainOnMnist(options);

@@ -26,7 +26,9 @@ namespace MLP
 
         public bool IsVerbose { get; set; }
 
-        public MlpOptions(double learningRate, double momentum, double errorThreshold, int[] sizes, string trainingPath, string validationPath, string testPath, int maxEpochs, bool isVerbose)
+        public int BatchSize { get; set; }
+
+        public MlpOptions(double learningRate, double momentum, double errorThreshold, int[] sizes, string trainingPath, string validationPath, string testPath, int maxEpochs, bool isVerbose, int batchSize)
         {
             this.LearningRate = learningRate;
             this.Momentum = momentum;
@@ -37,6 +39,7 @@ namespace MLP
             this.TestPath = testPath;
             MaxEpochs = maxEpochs;
             IsVerbose = isVerbose;
+            BatchSize = batchSize;
         }
     }
 }

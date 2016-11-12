@@ -21,7 +21,7 @@ namespace MLP
         {
             var sigmoid = Sigmoid(input);
 
-            var result = sigmoid.PointwiseMultiply(sigmoid.Map(x => 1 - x, Zeros.Include));
+            var result = sigmoid.PointwiseMultiply(1 - sigmoid);
 
             return result;
         }

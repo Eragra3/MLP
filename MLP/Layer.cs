@@ -24,7 +24,7 @@ namespace MLP
         /// </remarks>
         [JsonProperty]
         [JsonConverter(typeof(MatrixConverter))]
-        public readonly Matrix<double> Weights;
+        public Matrix<double> Weights;
 
         /// <summary>
         /// Vector
@@ -32,7 +32,7 @@ namespace MLP
         /// </summary>
         [JsonProperty]
         [JsonConverter(typeof(VectorConverter))]
-        public readonly Vector<double> Biases;
+        public Vector<double> Biases;
 
         private readonly int _inputsCount;
         private readonly int _neuronsCount;
@@ -44,9 +44,9 @@ namespace MLP
             {
                 if (_continuousDistribution != null) return _continuousDistribution;
 
-                var min = -Math.Pow(_neuronsCount, -1.0 / _inputsCount);
-                var max = Math.Pow(_neuronsCount, 1.0 / _inputsCount);
-                _continuousDistribution = new ContinuousUniform(min, max);
+                //var min = -Math.Pow(_neuronsCount, -1.0 / _inputsCount);
+                //var max = Math.Pow(_neuronsCount, 1.0 / _inputsCount);
+                _continuousDistribution = new Normal(0.0, 0.5);
 
                 return _continuousDistribution;
             }
@@ -67,22 +67,22 @@ namespace MLP
         /// <param name="isOutputLayer">Is it last nn layer</param>
         public Layer(int inputsCount, int outputsCount, bool isOutputLayer)
         {
-            if (isOutputLayer) ContinuousUniform = new ContinuousUniform(-0.5, 0.5);
+            //if (isOutputLayer) ContinuousUniform = new ContinuousUniform(-0.5, 0.5);
 
             _inputsCount = inputsCount;
             _neuronsCount = outputsCount;
 
-            Weights = GetNewWeightsMatrix();
-            Biases = GetNewBiasesVector();
+            Weights = GetNewWeightsMatrix(false);
+            Biases = GetNewBiasesVector(false);
         }
 
-        public Matrix GetNewWeightsMatrix(bool allZeroes = false)
+        public Matrix GetNewWeightsMatrix(bool allZeroes)
         {
             if (allZeroes) return new DenseMatrix(_neuronsCount, _inputsCount);
             return DenseMatrix.CreateRandom(_neuronsCount, _inputsCount, ContinuousUniform);
         }
 
-        public Vector GetNewBiasesVector(bool allZeroes = false)
+        public Vector GetNewBiasesVector(bool allZeroes)
         {
             if (allZeroes) return new DenseVector(_neuronsCount);
             return DenseVector.CreateRandom(_neuronsCount, ContinuousUniform);
@@ -95,17 +95,15 @@ namespace MLP
         /// <returns></returns>
         public Vector<double> Feedforward(Vector<double> inputs)
         {
-            var output = GetOutput(inputs);
+            var output = GetNet(inputs);
 
             return GetActivation(output);
         }
 
-        public Vector<double> GetOutput(Vector<double> inputs)
+        public Vector<double> GetNet(Vector<double> inputs)
         {
             //(O x I * I x 1) o 0 x 1 = O x 1
-            var output = Weights * inputs + Biases;
-
-            return output;
+            return Weights * inputs + Biases;
         }
 
         /// <summary>
@@ -120,12 +118,12 @@ namespace MLP
 
         public Vector<double> ActivationFunction(Vector<double> output)
         {
-            return HelperFunctions.Tanh(output);
+            return HelperFunctions.Sigmoid(output);
         }
 
         public Vector<double> ActivationFunctionPrime(Vector<double> output)
         {
-            return HelperFunctions.TanhPrime(output);
+            return HelperFunctions.SigmoidPrime(output);
         }
     }
 }

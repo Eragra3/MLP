@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
+using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -13,15 +15,12 @@ namespace MLP.MnistHelpers
     {
         public static string ToMatrix(Vector<double> model, int width)
         {
-            var max = model.Max();
-            var maxDigits = (int)Math.Floor(Math.Log10(max) + 1);
-
             var sb = new StringBuilder();
             const string separator = "|";
 
             for (int i = 0; i < model.Count; i++)
             {
-                sb.Append(model[i].ToString().PadRight(maxDigits));
+                sb.Append(Math.Floor(model[i] * 255).ToString(CultureInfo.InvariantCulture).PadRight(3, ' '));
 
                 sb.Append((i + 1) % width == 0 ? "\n" : separator);
             }
@@ -35,9 +34,9 @@ namespace MLP.MnistHelpers
 
             for (int i = 0; i < model.Count; i++)
             {
-                if (model[i] > 196) sb.Append(" ");
-                else if (model[i] > 32) sb.Append("+");
-                else sb.Append("@");
+                if (model[i] > 0.75) sb.Append("@");
+                else if (model[i] > 0.2) sb.Append("+");
+                else sb.Append(" ");
 
                 if ((i + 1) % width == 0) sb.Append("\n");
             }

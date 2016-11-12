@@ -11,5 +11,7 @@
         public int MaxEpochs { get; set; }
 
         public bool IsVerbose { get; set; }
+
+        public int BathSize { get; set; }
     }
 }

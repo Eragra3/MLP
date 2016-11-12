@@ -26,7 +26,8 @@ namespace MLP
                 ErrorThreshold = options.ErrorThreshold,
                 ValidationSet = validationSet,
                 TrainingSet = trainingSet,
-                IsVerbose = isVerbose
+                IsVerbose = isVerbose,
+                BathSize = options.BatchSize
             };
 
             var trainingResult = mlp.Train(trainingModel);
