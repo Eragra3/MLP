@@ -9,7 +9,6 @@ using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using MLP.Serialization;
 using Newtonsoft.Json;
-using static MLP.HelperFunctions;
 
 namespace MLP
 {
@@ -116,7 +115,17 @@ namespace MLP
         /// <returns></returns>
         public Vector<double> GetActivation(Vector<double> output)
         {
-            return Sigmoid(output);
+            return ActivationFunction(output);
+        }
+
+        public Vector<double> ActivationFunction(Vector<double> output)
+        {
+            return HelperFunctions.Tanh(output);
+        }
+
+        public Vector<double> ActivationFunctionPrime(Vector<double> output)
+        {
+            return HelperFunctions.TanhPrime(output);
         }
     }
 }

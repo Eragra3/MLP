@@ -9,7 +9,6 @@ using MathNet.Numerics.LinearAlgebra.Double;
 using MathNet.Numerics.LinearRegression;
 using MLP.MnistHelpers;
 using Newtonsoft.Json;
-using static MLP.HelperFunctions;
 
 namespace MLP
 {
@@ -60,13 +59,12 @@ namespace MLP
         public Vector<double> Feedforward(Vector<double> inputs)
         {
             var output = inputs;
-
             for (int i = 0; i < _layers.Length; i++)
             {
                 output = _layers[i].Feedforward(output);
             }
 
-            return Sigmoid(output);
+            return output;
         }
 
         public int Compute(Vector<double> inputs)
@@ -110,11 +108,12 @@ namespace MLP
 
             #region get output layer nablas
             var outputLayerIndex = layersCount - 1;
-            var outputLayerWeights = _layers[outputLayerIndex].Weights;
+            var outputLayer = _layers[outputLayerIndex];
+            var outputLayerWeights = outputLayer.Weights;
             var outputLayerActivation = activations[outputLayerIndex];
             var outputLayerOutput = outputs[outputLayerIndex];
 
-            var outputLayerOutputDerivative = SigmoidPrime(outputLayerOutput);
+            var outputLayerOutputDerivative = outputLayer.ActivationFunctionPrime(outputLayerOutput);
 
             var delta = (outputLayerActivation - expectedOutput).PointwiseMultiply(outputLayerOutputDerivative);
 
@@ -125,11 +124,11 @@ namespace MLP
             for (int layerIndex = _layers.Length - 2; layerIndex >= 0; layerIndex--)
             {
                 var output = outputs[layerIndex];
-                var sigmoidPrime = SigmoidPrime(output);
+                var outputPrime = _layers[layerIndex].ActivationFunctionPrime(output);
                 var nextLayerWeights = _layers[layerIndex + 1].Weights;
                 var prevLayerActivation = layerIndex == 0 ? inputs : activations[layerIndex - 1];
 
-                delta = nextLayerWeights.Transpose().Multiply(delta).PointwiseMultiply(sigmoidPrime);
+                delta = nextLayerWeights.Transpose().Multiply(delta).PointwiseMultiply(outputPrime);
                 nablaBiases[layerIndex] = delta;
                 nablaWeights[layerIndex] = delta.OuterProduct(prevLayerActivation);
             }
@@ -188,14 +187,14 @@ namespace MLP
                 epoch++;
                 errorSum = 0;
 
-                foreach (var item in RandomPermutation(trainingSet))
+                foreach (var item in HelperFunctions.RandomPermutation(trainingSet))
                 {
                     var bpResult = Backpropagate(item.Values, item.ExpectedSolution);
 
                     for (int i = 0; i < layersCount - 1; i++)
                     {
-                        nablaBiases[i] += bpResult.Biases[i];
-                        nablaWeights[i] += bpResult.Weights[i];
+                        nablaBiases[i].Add(bpResult.Biases[i], nablaBiases[i]);
+                        nablaWeights[i].Add(bpResult.Weights[i], nablaWeights[i]);
                     }
 
                     var solution = bpResult.Solution;
@@ -212,21 +211,20 @@ namespace MLP
                 for (int i = 0; i < layersCount; i++)
                 {
                     var weights = _layers[i].Weights;
-                    var weightsChange = _learningRate * nablaWeights[i];
+                    var weightsChange = _learningRate / trainingSet.Length * nablaWeights[i];
                     weights.Subtract(weightsChange, weights);
 
                     var biases = _layers[i].Biases;
-                    var biasesChange = _learningRate * nablaBiases[i];
+                    var biasesChange = _learningRate / trainingSet.Length * nablaBiases[i];
                     biases.Subtract(biasesChange, biases);
                 }
                 #endregion
-
 
                 if (isVerbose)
                 {
                     var lastEpochError = epochErrors.LastOrDefault();
                     Console.WriteLine($"Epoch - {epoch}," +
-                                      $" error - {Math.Round(errorSum, 2)}, " +
+                                      $" error - {Math.Round(errorSum / trainingSet.Length, 2)}, " +
                                       $"change - {Math.Round(lastEpochError - errorSum, 2)}");
                 }
 

@@ -13,7 +13,7 @@ namespace MLP
 
         public static Vector<double> Sigmoid(Vector<double> input)
         {
-            var result = input.Map(x => 1.0 / (1.0 + Math.Exp(-x)));
+            var result = input.Map(x => 1.0 / (1.0 + Math.Exp(-x)), Zeros.Include);
             return result;
         }
 
@@ -22,6 +22,19 @@ namespace MLP
             var sigmoid = Sigmoid(input);
 
             var result = sigmoid.PointwiseMultiply(sigmoid.Map(x => 1 - x, Zeros.Include));
+
+            return result;
+        }
+
+        public static Vector<double> Tanh(Vector<double> input)
+        {
+            var result = input.Map(Math.Tanh, Zeros.Include);
+            return result;
+        }
+
+        public static Vector<double> TanhPrime(Vector<double> input)
+        {
+            var result = input.Map(x => 1 - Math.Pow(Math.Tanh(x), 2), Zeros.Include);
 
             return result;
         }
