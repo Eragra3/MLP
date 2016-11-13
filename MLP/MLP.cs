@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -197,7 +198,13 @@ namespace MLP
                 //Console.WriteLine(nablaWeights[0].ToString(nablaWeights[0].RowCount, nablaWeights[0].ColumnCount));
                 //Console.WriteLine(_layers[0].Weights.ToString());
                 //Console.WriteLine("-".PadLeft(80,'*'));
-                Console.WriteLine(MlpTrainer.Evaluate(this, validationSet).Percentage);
+                if (isVerbose)
+                {
+                    var percentage = MlpTrainer.Evaluate(this, validationSet).Percentage;
+                    Console.WriteLine($"Epoch - {epoch}," +
+                                      $" error - {Math.Round(errorSum / batchSize, 2)}," +
+                                      $" test - {percentage}");
+                }
 
                 #region update parameters
                 for (int i = 0; i < layersCount; i++)
@@ -212,11 +219,6 @@ namespace MLP
                 }
                 #endregion
 
-                if (isVerbose)
-                {
-                    Console.WriteLine($"Epoch - {epoch}," +
-                                      $" error - {Math.Round(errorSum / batchSize, 2)}");
-                }
 
                 #region set nablas to zeroes
                 for (int i = 0; i < layersCount; i++)
