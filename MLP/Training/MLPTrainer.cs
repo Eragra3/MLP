@@ -5,6 +5,13 @@ namespace MLP.Training
 {
     public static class MlpTrainer
     {
+        private static MnistImage[] _trainingSet;
+        private static string _trainingSetPath;
+        private static MnistImage[] _testSet;
+        private static string _testSetPath;
+        private static MnistImage[] _validationSet;
+        private static string _validationSetPath;
+
         public static TrainingResult TrainOnMnist(MlpOptions options)
         {
             var isVerbose = options.IsVerbose;
@@ -14,9 +21,24 @@ namespace MLP.Training
                 options.NormalStDeviation,
                 options.Sizes);
 
-            var trainingSet = MnistParser.ReadAll(options.TrainingPath);
-            var testSet = MnistParser.ReadAll(options.TestPath);
-            var validationSet = MnistParser.ReadAll(options.ValidationPath);
+            if (_trainingSetPath != options.TrainingPath || _trainingSet == null)
+            {
+                _trainingSet = MnistParser.ReadAll(options.TrainingPath);
+                _trainingSetPath = options.TrainingPath;
+            }
+            var trainingSet = _trainingSet;
+            if (_testSetPath != options.TestPath || _testSet == null)
+            {
+                _testSet = MnistParser.ReadAll(options.TestPath);
+                _testSetPath = options.TestPath;
+            }
+            var testSet = _testSet;
+            if (_validationSetPath != options.ValidationPath || _validationSet == null)
+            {
+                _validationSet = MnistParser.ReadAll(options.ValidationPath);
+                _validationSetPath = options.ValidationPath;
+            }
+            var validationSet = _validationSet;
 
             var trainingModel = new TrainingModel
             {

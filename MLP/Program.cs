@@ -34,7 +34,7 @@ namespace MLP
             bool evaluate = false;
 
             //mlp params
-            int[] layersSizes = { 70, 15, 10 };
+            int[] layersSizes = { 70, 200, 10 };
             double learningRate = 0.25;
             double momentum = 0.01;
             double errorThreshold = 1;
@@ -209,16 +209,6 @@ namespace MLP
                     break;
                 case Command.Experiment:
                     {
-                        try
-                        {
-                            File.Create(outputPath).Close();
-                        }
-                        catch (Exception)
-                        {
-                            Console.WriteLine($"Path is invalid");
-                            return;
-                        }
-
                         var options = new MlpOptions(
                             learningRate,
                             momentum,

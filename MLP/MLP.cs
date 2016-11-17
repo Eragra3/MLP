@@ -138,7 +138,7 @@ namespace MLP
             var isVerbose = trainingModel.IsVerbose;
             var evaluateOnEachEpoch = trainingModel.EvaluateOnEachEpoch;
 
-            IList<double> epochErrors = new List<double>();
+            IList<double> epochErrors = new List<double> { 0 };
             var epochEvaluations = new List<MlpTrainer.EvaluationModel>();
 
             double errorSum = double.PositiveInfinity;

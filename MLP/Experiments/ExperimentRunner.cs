@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Text;
 using MLP.Training;
 
@@ -19,12 +21,15 @@ namespace MLP
         {
             //disable early learning end
             options.ErrorThreshold = 0;
+            var isVerbose = options.IsVerbose;
 
-            File.Create(logPath);
+            Directory.CreateDirectory(logPath.Split('/')[0]);
 
             for (int i = 0; i < learningRates.Length; i++)
             {
                 var learningRate = learningRates[i];
+
+                if (isVerbose) Console.WriteLine($"Running experiment for {learningRate}");
 
                 var trainingOptions = new MlpOptions(
                     learningRate,
@@ -54,6 +59,10 @@ namespace MLP
                 }
 
                 //log data
+                var path = logPath + "_" + learningRate + ".csv";
+
+                //File.Create(path);
+
                 StringBuilder log = new StringBuilder("sep=|");
                 log.AppendLine();
                 log.Append("epoch");
@@ -68,10 +77,11 @@ namespace MLP
                     for (int n = 0; n < trainingResponses.Length; n++)
                     {
                         var result = trainingResponses[n];
-                        log.Append("|" + result.Evaluations[j] + "|" + result.EpochErrors[j]);
+                        log.Append("|" + result.Evaluations[j].Percentage + "|" + result.EpochErrors[j]);
                     }
                     log.AppendLine();
                 }
+                File.WriteAllText(path, log.ToString());
             }
         }
     }
