@@ -1,4 +1,4 @@
-﻿namespace MLP
+﻿namespace MLP.Training
 {
     public class TrainingModel
     {

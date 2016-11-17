@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace MLP
 {
-    public class TrainingStatistics
+    public enum ActivationFunction
     {
-        public TrainingResult TrainingResult { get; set; }
-
+        Sigmoid,
+        Tanh
     }
 }

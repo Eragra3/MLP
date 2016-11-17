@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MathNet.Numerics.LinearAlgebra;
 using MLP.MnistHelpers;
 
-namespace MLP
+namespace MLP.Training
 {
     public static class MlpTrainer
     {
@@ -15,7 +9,13 @@ namespace MLP
         {
             var isVerbose = options.IsVerbose;
 
-            var mlp = new Mlp(options.LearningRate, options.Momentum, options.ErrorThreshold, options.Sizes);
+            var mlp = new Mlp(
+                options.LearningRate, 
+                options.Momentum,
+                options.ErrorThreshold, 
+                options.ActivationFunction, 
+                options.NormalStDeviation,
+                options.Sizes);
 
             var trainingSet = MnistParser.ReadAll(options.TrainingPath);
             var validationSet = MnistParser.ReadAll(options.ValidationPath);

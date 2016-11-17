@@ -55,26 +55,26 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BackpropagationResult.cs" />
-    <Compile Include="InputModels.cs" />
+    <Compile Include="ActivationFunction.cs" />
     <Compile Include="MLPOptions.cs" />
     <Compile Include="Serialization\VectorSerializationModel.cs" />
-    <Compile Include="TrainingModel.cs" />
-    <Compile Include="TrainingResult.cs" />
     <Compile Include="Serialization\MatrixConverter.cs" />
     <Compile Include="Serialization\MatrixSerializationModel.cs" />
     <Compile Include="Serialization\VectorConverter.cs" />
-    <Compile Include="MLPTrainer.cs" />
     <Compile Include="MnistHelpers\MnistParser.cs" />
     <Compile Include="Cmd\Command.cs" />
-    <Compile Include="Extensions\RandomExtensions.cs" />
     <Compile Include="HelperFunctions.cs" />
     <Compile Include="Layer.cs" />
     <Compile Include="MLP.cs" />
     <Compile Include="MnistHelpers\MnistViewer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TrainingStatistics.cs" />
+    <Compile Include="Training\BackpropagationResult.cs" />
+    <Compile Include="Training\InputModels.cs" />
+    <Compile Include="Training\MLPTrainer.cs" />
+    <Compile Include="Training\TrainingModel.cs" />
+    <Compile Include="Training\TrainingResult.cs" />
+    <Compile Include="Training\TrainingStatistics.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

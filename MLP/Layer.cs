@@ -37,6 +37,10 @@ namespace MLP
         private readonly int _inputsCount;
         private readonly int _neuronsCount;
 
+        private readonly ActivationFunction _activationFunction;
+        public ActivationFunction CurrentActivationFunction => _activationFunction;
+        private readonly double _normalStDev;
+
         private IContinuousDistribution _continuousDistribution;
         private IContinuousDistribution ContinuousUniform
         {
@@ -44,9 +48,7 @@ namespace MLP
             {
                 if (_continuousDistribution != null) return _continuousDistribution;
 
-                //var min = -Math.Pow(_neuronsCount, -1.0 / _inputsCount);
-                //var max = Math.Pow(_neuronsCount, 1.0 / _inputsCount);
-                _continuousDistribution = new Normal(0.0, 0.5);
+                _continuousDistribution = new Normal(0.0, _normalStDev);
 
                 return _continuousDistribution;
             }
@@ -65,12 +67,12 @@ namespace MLP
         /// <param name="inputsCount">Number of inputs to each vector</param>
         /// <param name="outputsCount">Same as neuron count in this layer</param>
         /// <param name="isOutputLayer">Is it last nn layer</param>
-        public Layer(int inputsCount, int outputsCount, bool isOutputLayer)
+        public Layer(int inputsCount, int outputsCount, ActivationFunction activationFunction, double normalStDev)
         {
-            //if (isOutputLayer) ContinuousUniform = new ContinuousUniform(-0.5, 0.5);
-
+            _activationFunction = activationFunction;
             _inputsCount = inputsCount;
             _neuronsCount = outputsCount;
+            _normalStDev = normalStDev;
 
             Weights = GetNewWeightsMatrix(false);
             Biases = GetNewBiasesVector(false);
@@ -118,12 +120,28 @@ namespace MLP
 
         public Vector<double> ActivationFunction(Vector<double> output)
         {
-            return HelperFunctions.Sigmoid(output);
+            switch (_activationFunction)
+            {
+                case MLP.ActivationFunction.Sigmoid:
+                    return HelperFunctions.Sigmoid(output);
+                case MLP.ActivationFunction.Tanh:
+                    return HelperFunctions.Tanh(output);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         public Vector<double> ActivationFunctionPrime(Vector<double> output)
         {
-            return HelperFunctions.SigmoidPrime(output);
+            switch (_activationFunction)
+            {
+                case MLP.ActivationFunction.Sigmoid:
+                    return HelperFunctions.SigmoidPrime(output);
+                case MLP.ActivationFunction.Tanh:
+                    return HelperFunctions.TanhPrime(output);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 }

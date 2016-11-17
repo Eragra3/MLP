@@ -9,6 +9,7 @@ using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using MathNet.Numerics.LinearRegression;
 using MLP.MnistHelpers;
+using MLP.Training;
 using Newtonsoft.Json;
 
 namespace MLP
@@ -38,7 +39,14 @@ namespace MLP
 
         }
 
-        public Mlp(double learningRate, double momentum, double errorThreshold, params int[] sizes)
+        public Mlp(
+            double learningRate,
+            double momentum,
+            double errorThreshold,
+            ActivationFunction activationFunction,
+            double normalStDev,
+            params int[] sizes
+            )
         {
             _learningRate = learningRate;
             _momentum = momentum;
@@ -48,7 +56,8 @@ namespace MLP
 
             for (int i = 0; i < sizes.Length - 1; i++)
             {
-                _layers[i] = new Layer(sizes[i], sizes[i + 1], i == sizes.Length - 1);
+                //var isLast = i == sizes.Length - 1;
+                _layers[i] = new Layer(sizes[i], sizes[i + 1], activationFunction, normalStDev);
             }
         }
 
@@ -164,12 +173,14 @@ namespace MLP
 
             if (isVerbose)
             {
+                var activationFunctions = _layers.Select(l => l.CurrentActivationFunction.ToString()).ToArray();
                 Console.WriteLine("Starting with params:");
                 Console.WriteLine($"\tsizes- {JsonConvert.SerializeObject(_sizes)}");
                 Console.WriteLine($"\tlearning rate - {_learningRate}");
                 //Console.WriteLine($"\tmomentum- {_momentum}"););
                 Console.WriteLine($"\terror threshold - {errorTreshold}");
                 Console.WriteLine($"\tmax epochs - {maxEpochs}");
+                Console.WriteLine($"\tactivation functions - {JsonConvert.SerializeObject(activationFunctions, Formatting.None)}");
             }
 
             //Debugger.Launch();

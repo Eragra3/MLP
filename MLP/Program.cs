@@ -8,6 +8,7 @@ using MLP.Cmd;
 using MLP.MnistHelpers;
 using TTRider.FluidCommandLine;
 using System.IO;
+using MLP.Training;
 using Newtonsoft.Json;
 
 namespace MLP
@@ -29,13 +30,15 @@ namespace MLP
             bool print = false;
             bool dump = false;
             bool evaluate = false;
-            int batchSize = 20;
 
             //mlp params
             int[] layersSizes = { 70, 15, 10 };
             double learningRate = 0.25;
             double momentum = 0.001;
             double errorThreshold = 1;
+            int batchSize = 20;
+            ActivationFunction activationFunction = ActivationFunction.Sigmoid;
+            double normalStDev = 0.5;
 
             int maxEpochs = 50;
 
@@ -53,10 +56,12 @@ namespace MLP
                     .DefaultParameter("output", path => outputPath = path, "Output file to save trained mlp")
                     .Parameter("sizes", sizes => layersSizes = JsonConvert.DeserializeObject<int[]>(sizes), "Number of layer and its sizes, default to [70,5,10]", "Sizes")
                     .Parameter("learning-rate", val => learningRate = double.Parse(val, CultureInfo.InvariantCulture), "Learning rate")
-                    .Parameter("momentum", val => momentum = double.Parse(val), "Momenum parameter")
-                    .Parameter("error-threshold", val => errorThreshold = double.Parse(val), "Error threshold to set learning stop criteria")
+                    .Parameter("momentum", val => momentum = double.Parse(val, CultureInfo.InvariantCulture), "Momenum parameter")
+                    .Parameter("error-threshold", val => errorThreshold = double.Parse(val, CultureInfo.InvariantCulture), "Error threshold to set learning stop criteria")
                     .Parameter("max-epochs", val => maxEpochs = int.Parse(val), "Program will terminate learning if reaches this epoch")
                     .Parameter("batch-size", val => batchSize = int.Parse(val), "Batch size")
+                    .Parameter("activation", val => activationFunction = ParseActivationFunction(val), "Activation function, (sigmoid, tanh)")
+                    .Parameter("normal", val => normalStDev = double.Parse(val, CultureInfo.InvariantCulture), "Initial weights normal distribution standard deviation")
                     .Option("v", () => isVerbose = true, "Explain what is happening")
                     .Option("verbose", () => isVerbose = true, "Explain what is happening")
                 .Command("view", () => command = Command.View, "Show MNIST imag")
@@ -93,7 +98,9 @@ namespace MLP
                             TEST_DATA_PATH,
                             maxEpochs,
                             isVerbose,
-                            batchSize
+                            batchSize,
+                            activationFunction,
+                            normalStDev
                             );
 
                         var statistics = MlpTrainer.TrainOnMnist(options);
@@ -180,6 +187,20 @@ namespace MLP
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private static ActivationFunction ParseActivationFunction(string val)
+        {
+            val = val.ToLower();
+            switch (val)
+            {
+                case "sigmoid":
+                    return ActivationFunction.Sigmoid;
+                case "tanh":
+                    return ActivationFunction.Tanh;
+                default:
+                    throw new ArgumentException();
             }
         }
     }

@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
+using MLP.Training;
 
 namespace MLP.MnistHelpers
 {
