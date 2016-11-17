@@ -22,15 +22,6 @@ namespace MLP
         [JsonProperty]
         private int[] _sizes;
 
-        [JsonProperty]
-        private double _learningRate;
-
-        [JsonProperty]
-        private double _momentum;
-
-        [JsonProperty]
-        private double _errorThreshold;
-
         /// <summary>
         /// Should only be used to create deserialized object
         /// </summary>
@@ -40,17 +31,11 @@ namespace MLP
         }
 
         public Mlp(
-            double learningRate,
-            double momentum,
-            double errorThreshold,
             ActivationFunction activationFunction,
             double normalStDev,
             params int[] sizes
             )
         {
-            _learningRate = learningRate;
-            _momentum = momentum;
-            _errorThreshold = errorThreshold;
             _sizes = sizes;
             _layers = new Layer[sizes.Length - 1];
 
@@ -153,6 +138,8 @@ namespace MLP
             var maxEpochs = trainingModel.MaxEpochs;
             var isVerbose = trainingModel.IsVerbose;
             var batchSize = trainingModel.BathSize;
+            var learningRate = trainingModel.LearningRate;
+            var momentum = trainingModel.Momentum;
 
             IList<double> epochErrors = new List<double>();
 
@@ -177,8 +164,8 @@ namespace MLP
                 var distributions = _layers.Select(l => l.CurrentDistribution.ToString()).ToArray();
                 Console.WriteLine("Starting with params:");
                 Console.WriteLine($"\tsizes- {JsonConvert.SerializeObject(_sizes)}");
-                Console.WriteLine($"\tlearning rate - {_learningRate}");
-                //Console.WriteLine($"\tmomentum- {_momentum}"););
+                Console.WriteLine($"\tlearning rate - {learningRate}");
+                Console.WriteLine($"\tmomentum- {momentum}");
                 Console.WriteLine($"\terror threshold - {errorTreshold}");
                 Console.WriteLine($"\tmax epochs - {maxEpochs}");
                 Console.WriteLine($"\tactivation functions - {JsonConvert.SerializeObject(activationFunctions, Formatting.None)}");
@@ -186,6 +173,15 @@ namespace MLP
             }
 
             //Debugger.Launch();
+
+            Matrix<double>[] prevWeightsChange = new Matrix<double>[layersCount];
+            Vector<double>[] prevBiasChange = new Vector<double>[layersCount];
+
+            if (isVerbose)
+            {
+                var percentage = MlpTrainer.Evaluate(this, validationSet).Percentage;
+                Console.WriteLine($"Initial state, {percentage}");
+            }
 
             while (errorSum > errorTreshold && epoch < maxEpochs)
             {
@@ -207,30 +203,33 @@ namespace MLP
 
                     errorSum += solution.Map2((y, o) => Math.Pow(y - o, 2), expectedSolution).Sum();
                 }
-
-                //Console.WriteLine(nablaWeights[0].ToString(nablaWeights[0].RowCount, nablaWeights[0].ColumnCount));
-                //Console.WriteLine(_layers[0].Weights.ToString());
-                //Console.WriteLine("-".PadLeft(80,'*'));
-                if (isVerbose)
-                {
-                    var percentage = MlpTrainer.Evaluate(this, validationSet).Percentage;
-                    Console.WriteLine($"Epoch - {epoch}," +
-                                      $" error - {Math.Round(errorSum / batchSize, 2)}," +
-                                      $" test - {percentage}");
-                }
+                errorSum /= batchSize;
 
                 #region update parameters
                 for (int i = 0; i < layersCount; i++)
                 {
                     var weights = _layers[i].Weights;
-                    var weightsChange = _learningRate / batchSize * nablaWeights[i];
+                    var weightsChange = learningRate / batchSize * nablaWeights[i];
+                    if (prevWeightsChange[i] != null) weightsChange += momentum * prevWeightsChange[i];
                     _layers[i].Weights = weights - weightsChange;
 
                     var biases = _layers[i].Biases;
-                    var biasesChange = _learningRate / batchSize * nablaBiases[i];
+                    var biasesChange = learningRate / batchSize * nablaBiases[i];
+                    if (prevBiasChange[i] != null) biasesChange += momentum * prevBiasChange[i];
                     _layers[i].Biases = biases - biasesChange;
+
+                    prevWeightsChange[i] = weightsChange;
+                    prevBiasChange[i] = biasesChange;
                 }
                 #endregion
+
+                if (isVerbose)
+                {
+                    var percentage = MlpTrainer.Evaluate(this, validationSet).Percentage;
+                    Console.WriteLine($"Epoch - {epoch}," +
+                                      $" error - {errorSum.ToString("#0.000")}," +
+                                      $" test - {percentage}");
+                }
 
 
                 #region set nablas to zeroes

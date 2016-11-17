@@ -10,10 +10,7 @@ namespace MLP.Training
             var isVerbose = options.IsVerbose;
 
             var mlp = new Mlp(
-                options.LearningRate, 
-                options.Momentum,
-                options.ErrorThreshold, 
-                options.ActivationFunction, 
+                options.ActivationFunction,
                 options.NormalStDeviation,
                 options.Sizes);
 
@@ -27,7 +24,9 @@ namespace MLP.Training
                 ValidationSet = validationSet,
                 TrainingSet = trainingSet,
                 IsVerbose = isVerbose,
-                BathSize = options.BatchSize
+                BathSize = options.BatchSize,
+                LearningRate = options.LearningRate,
+                Momentum = options.Momentum
             };
 
             var trainingResult = mlp.Train(trainingModel);

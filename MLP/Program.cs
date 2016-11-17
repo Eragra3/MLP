@@ -39,7 +39,7 @@ namespace MLP
             //mlp params
             int[] layersSizes = { 70, 15, 10 };
             double learningRate = 0.25;
-            double momentum = 0.001;
+            double momentum = 0.01;
             double errorThreshold = 1;
             int batchSize = 20;
             ActivationFunction activationFunction = ActivationFunction.Sigmoid;

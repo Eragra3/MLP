@@ -13,5 +13,9 @@
         public bool IsVerbose { get; set; }
 
         public int BathSize { get; set; }
+
+        public double LearningRate { get; set; }
+
+        public double Momentum { get; set; }
     }
 }
