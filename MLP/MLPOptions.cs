@@ -34,17 +34,17 @@ namespace MLP
 
         public MlpOptions(double learningRate, double momentum, double errorThreshold, int[] sizes, string trainingPath, string validationPath, string testPath, int maxEpochs, bool isVerbose, int batchSize, ActivationFunction activationFunction, double normalStDeviation)
         {
-            this.LearningRate = learningRate;
-            this.Momentum = momentum;
-            this.ErrorThreshold = errorThreshold;
-            this.Sizes = sizes;
-            this.TrainingPath = trainingPath;
-            this.ValidationPath = validationPath;
-            this.TestPath = testPath;
-            this.MaxEpochs = maxEpochs;
-            this.IsVerbose = isVerbose;
-            this.BatchSize = batchSize;
-            this.ActivationFunction = activationFunction;
+            LearningRate = learningRate;
+            Momentum = momentum;
+            ErrorThreshold = errorThreshold;
+            Sizes = sizes;
+            TrainingPath = trainingPath;
+            ValidationPath = validationPath;
+            TestPath = testPath;
+            MaxEpochs = maxEpochs;
+            IsVerbose = isVerbose;
+            BatchSize = batchSize;
+            ActivationFunction = activationFunction;
             NormalStDeviation = normalStDeviation;
         }
     }

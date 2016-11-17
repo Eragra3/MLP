@@ -41,18 +41,18 @@ namespace MLP
         public ActivationFunction CurrentActivationFunction => _activationFunction;
         private readonly double _normalStDev;
 
-        private IContinuousDistribution _continuousDistribution;
-        private IContinuousDistribution ContinuousUniform
+        private IContinuousDistribution _distribution;
+        public IContinuousDistribution CurrentDistribution
         {
             get
             {
-                if (_continuousDistribution != null) return _continuousDistribution;
+                if (_distribution != null) return _distribution;
 
-                _continuousDistribution = new Normal(0.0, _normalStDev);
+                _distribution = new Normal(0.0, _normalStDev);
 
-                return _continuousDistribution;
+                return _distribution;
             }
-            set { _continuousDistribution = value; }
+            set { _distribution = value; }
         }
 
         [JsonConstructor]
@@ -66,7 +66,8 @@ namespace MLP
         /// </summary>
         /// <param name="inputsCount">Number of inputs to each vector</param>
         /// <param name="outputsCount">Same as neuron count in this layer</param>
-        /// <param name="isOutputLayer">Is it last nn layer</param>
+        /// <param name="activationFunction"></param>
+        /// <param name="normalStDev"></param>
         public Layer(int inputsCount, int outputsCount, ActivationFunction activationFunction, double normalStDev)
         {
             _activationFunction = activationFunction;
@@ -81,13 +82,13 @@ namespace MLP
         public Matrix GetNewWeightsMatrix(bool allZeroes)
         {
             if (allZeroes) return new DenseMatrix(_neuronsCount, _inputsCount);
-            return DenseMatrix.CreateRandom(_neuronsCount, _inputsCount, ContinuousUniform);
+            return DenseMatrix.CreateRandom(_neuronsCount, _inputsCount, CurrentDistribution);
         }
 
         public Vector GetNewBiasesVector(bool allZeroes)
         {
             if (allZeroes) return new DenseVector(_neuronsCount);
-            return DenseVector.CreateRandom(_neuronsCount, ContinuousUniform);
+            return DenseVector.CreateRandom(_neuronsCount, CurrentDistribution);
         }
 
         /// <summary>

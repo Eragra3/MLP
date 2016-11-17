@@ -174,6 +174,7 @@ namespace MLP
             if (isVerbose)
             {
                 var activationFunctions = _layers.Select(l => l.CurrentActivationFunction.ToString()).ToArray();
+                var distributions = _layers.Select(l => l.CurrentDistribution.ToString()).ToArray();
                 Console.WriteLine("Starting with params:");
                 Console.WriteLine($"\tsizes- {JsonConvert.SerializeObject(_sizes)}");
                 Console.WriteLine($"\tlearning rate - {_learningRate}");
@@ -181,6 +182,7 @@ namespace MLP
                 Console.WriteLine($"\terror threshold - {errorTreshold}");
                 Console.WriteLine($"\tmax epochs - {maxEpochs}");
                 Console.WriteLine($"\tactivation functions - {JsonConvert.SerializeObject(activationFunctions, Formatting.None)}");
+                Console.WriteLine($"\tinitial weights distributions- {JsonConvert.SerializeObject(distributions, Formatting.None)}");
             }
 
             //Debugger.Launch();

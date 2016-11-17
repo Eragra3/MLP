@@ -8,6 +8,7 @@ using MLP.Cmd;
 using MLP.MnistHelpers;
 using TTRider.FluidCommandLine;
 using System.IO;
+using MathNet.Numerics;
 using MLP.Training;
 using Newtonsoft.Json;
 
@@ -22,6 +23,10 @@ namespace MLP
 
         static void Main(string[] args)
         {
+#if !DEBUG
+            Control.UseNativeMKL();
+#endif
+
             Command command = Command.Help;
             string nnJsonPath = "";
             bool isVerbose = false;
