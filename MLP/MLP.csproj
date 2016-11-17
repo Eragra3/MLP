@@ -58,7 +58,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActivationFunction.cs" />
-    <Compile Include="ExperimentRunner.cs" />
+    <Compile Include="Experiments\Experiment.cs" />
+    <Compile Include="Experiments\ExperimentRunner.cs" />
     <Compile Include="MLPOptions.cs" />
     <Compile Include="Serialization\VectorSerializationModel.cs" />
     <Compile Include="Serialization\MatrixConverter.cs" />

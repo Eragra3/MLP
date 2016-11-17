@@ -5,6 +5,7 @@
         Train,
         Test,
         View,
-        Help
+        Help,
+        Experiment
     }
 }

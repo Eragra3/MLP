@@ -5,6 +5,7 @@ using MLP.MnistHelpers;
 using TTRider.FluidCommandLine;
 using System.IO;
 using MathNet.Numerics;
+using MLP.Experiments;
 using MLP.Training;
 using Newtonsoft.Json;
 
@@ -41,7 +42,11 @@ namespace MLP
             ActivationFunction activationFunction = ActivationFunction.Sigmoid;
             double normalStDev = 0.5;
 
-            int maxEpochs = 50;
+            int maxEpochs = 200;
+
+            double[] experimentValues = null;
+            Experiment experiment = Experiment.LearningRate;
+            int repetitions = 1;
 
             ICommandLine commandLine = CommandLine
                 .Help("h")
@@ -65,12 +70,27 @@ namespace MLP
                     .Parameter("normal", val => normalStDev = double.Parse(val, CultureInfo.InvariantCulture), "Initial weights normal distribution standard deviation")
                     .Option("v", () => isVerbose = true, "Explain what is happening")
                     .Option("verbose", () => isVerbose = true, "Explain what is happening")
-                .Command("view", () => command = Command.View, "Show MNIST imag")
+                .Command("view", () => command = Command.View, "Show MNIST image")
                     .DefaultParameter("path", path => imagePath = path, "Path to image")
                     .Option("p", () => print = true, "Display grayscale interpretation")
                     .Option("print", () => print = true, "Display grayscale interpretation")
                     .Option("d", () => dump = true, "Dump image data")
                     .Option("dump", () => dump = true, "Dump image data")
+                .Command("experiment", () => command = Command.Experiment, "Run experiment")
+                    .DefaultParameter("output", path => outputPath = path, "Path to save data")
+                    .Parameter("values", val => experimentValues = JsonConvert.DeserializeObject<double[]>(val), "Values to test in experiment", "Experiment values")
+                    .Parameter("experiment", val => experiment = ParseExperimentType(val), "Momenum parameter")
+                    .Parameter("sizes", sizes => layersSizes = JsonConvert.DeserializeObject<int[]>(sizes), "Number of layer and its sizes, default to [70,5,10]", "Sizes")
+                    .Parameter("learning-rate", val => learningRate = double.Parse(val, CultureInfo.InvariantCulture), "Learning rate")
+                    .Parameter("momentum", val => momentum = double.Parse(val, CultureInfo.InvariantCulture), "Momenum parameter")
+                    .Parameter("error-threshold", val => errorThreshold = double.Parse(val, CultureInfo.InvariantCulture), "Error threshold to set learning stop criteria")
+                    .Parameter("max-epochs", val => maxEpochs = int.Parse(val), "Program will terminate learning if reaches this epoch")
+                    .Parameter("batch-size", val => batchSize = int.Parse(val), "Batch size")
+                    .Parameter("activation", val => activationFunction = ParseActivationFunction(val), "Activation function, (sigmoid, tanh)")
+                    .Parameter("normal", val => normalStDev = double.Parse(val, CultureInfo.InvariantCulture), "Initial weights normal distribution standard deviation")
+                    .Parameter("repetitions", val => repetitions = int.Parse(val, CultureInfo.InvariantCulture), "Number of repetitions for each value in experiment")
+                    .Option("v", () => isVerbose = true, "Explain what is happening")
+                    .Option("verbose", () => isVerbose = true, "Explain what is happening")
                 .End();
 
             commandLine.Run(args);
@@ -187,6 +207,53 @@ namespace MLP
                 case Command.Help:
                     commandLine.Run("help");
                     break;
+                case Command.Experiment:
+                    {
+                        try
+                        {
+                            File.Create(outputPath).Close();
+                        }
+                        catch (Exception)
+                        {
+                            Console.WriteLine($"Path is invalid");
+                            return;
+                        }
+
+                        var options = new MlpOptions(
+                            learningRate,
+                            momentum,
+                            errorThreshold,
+                            layersSizes,
+                            TRAINING_DATA_PATH,
+                            VALIDATION_PATH,
+                            TEST_DATA_PATH,
+                            maxEpochs,
+                            isVerbose,
+                            batchSize,
+                            activationFunction,
+                            normalStDev,
+                            true
+                            );
+
+                        switch (experiment)
+                        {
+                            case Experiment.LearningRate:
+                                ExperimentRunner.RunLearningRateExperiment(
+                                    experimentValues,
+                                    options,
+                                    repetitions,
+                                    outputPath
+                                    );
+                                break;
+                            case Experiment.ActivationFunction:
+                                break;
+                            case Experiment.Momentum:
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
+                    }
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -201,6 +268,22 @@ namespace MLP
                     return ActivationFunction.Sigmoid;
                 case "tanh":
                     return ActivationFunction.Tanh;
+                default:
+                    throw new ArgumentException();
+            }
+        }
+
+        private static Experiment ParseExperimentType(string val)
+        {
+            val = val.ToLower();
+            switch (val)
+            {
+                case "learningrate":
+                    return Experiment.LearningRate;
+                case "activation":
+                    return Experiment.ActivationFunction;
+                case "momentum":
+                    return Experiment.Momentum;
                 default:
                     throw new ArgumentException();
             }
