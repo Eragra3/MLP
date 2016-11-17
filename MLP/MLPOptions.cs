@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MLP
+﻿namespace MLP
 {
     public class MlpOptions
     {
@@ -32,7 +26,9 @@ namespace MLP
 
         public double NormalStDeviation { get; set; }
 
-        public MlpOptions(double learningRate, double momentum, double errorThreshold, int[] sizes, string trainingPath, string validationPath, string testPath, int maxEpochs, bool isVerbose, int batchSize, ActivationFunction activationFunction, double normalStDeviation)
+        public bool EvaluateOnEachEpoch { get; set; }
+
+        public MlpOptions(double learningRate, double momentum, double errorThreshold, int[] sizes, string trainingPath, string validationPath, string testPath, int maxEpochs, bool isVerbose, int batchSize, ActivationFunction activationFunction, double normalStDeviation, bool evaluateOnEachEpoch)
         {
             LearningRate = learningRate;
             Momentum = momentum;
@@ -46,6 +42,7 @@ namespace MLP
             BatchSize = batchSize;
             ActivationFunction = activationFunction;
             NormalStDeviation = normalStDeviation;
+            EvaluateOnEachEpoch = evaluateOnEachEpoch;
         }
     }
 }

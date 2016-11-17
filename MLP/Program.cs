@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MLP.Cmd;
 using MLP.MnistHelpers;
 using TTRider.FluidCommandLine;
@@ -105,12 +101,13 @@ namespace MLP
                             isVerbose,
                             batchSize,
                             activationFunction,
-                            normalStDev
+                            normalStDev,
+                            false
                             );
 
-                        var statistics = MlpTrainer.TrainOnMnist(options);
+                        var trainingResult = MlpTrainer.TrainOnMnist(options);
 
-                        var mlp = statistics.TrainingResult.Mlp;
+                        var mlp = trainingResult.Mlp;
 
                         File.WriteAllText(outputPath, mlp.ToJson());
 

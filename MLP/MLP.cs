@@ -1,14 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics.LinearAlgebra.Double;
-using MathNet.Numerics.LinearRegression;
-using MLP.MnistHelpers;
 using MLP.Training;
 using Newtonsoft.Json;
 
@@ -25,7 +18,8 @@ namespace MLP
         /// <summary>
         /// Should only be used to create deserialized object
         /// </summary>
-        public Mlp()
+        [JsonConstructor]
+        private Mlp()
         {
 
         }
@@ -133,15 +127,19 @@ namespace MLP
         public TrainingResult Train(TrainingModel trainingModel)
         {
             var trainingSet = trainingModel.TrainingSet;
+            var testSet = trainingModel.TestSet;
             var validationSet = trainingModel.ValidationSet;
             var errorTreshold = trainingModel.ErrorThreshold;
             var maxEpochs = trainingModel.MaxEpochs;
-            var isVerbose = trainingModel.IsVerbose;
-            var batchSize = trainingModel.BathSize;
+            var batchSize = trainingModel.BatchSize;
             var learningRate = trainingModel.LearningRate;
             var momentum = trainingModel.Momentum;
 
+            var isVerbose = trainingModel.IsVerbose;
+            var evaluateOnEachEpoch = trainingModel.EvaluateOnEachEpoch;
+
             IList<double> epochErrors = new List<double>();
+            var epochEvaluations = new List<MlpTrainer.EvaluationModel>();
 
             double errorSum = double.PositiveInfinity;
             int epoch = 0;
@@ -177,9 +175,16 @@ namespace MLP
             Matrix<double>[] prevWeightsChange = new Matrix<double>[layersCount];
             Vector<double>[] prevBiasChange = new Vector<double>[layersCount];
 
+            MlpTrainer.EvaluationModel initialEvaluation = null;
+            if (evaluateOnEachEpoch)
+            {
+                initialEvaluation = MlpTrainer.Evaluate(this, testSet);
+                epochEvaluations.Add(initialEvaluation);
+            }
+
             if (isVerbose)
             {
-                var percentage = MlpTrainer.Evaluate(this, validationSet).Percentage;
+                var percentage = (initialEvaluation ?? MlpTrainer.Evaluate(this, testSet)).Percentage;
                 Console.WriteLine($"Initial state, {percentage.ToString("#0.00")}");
             }
 
@@ -223,9 +228,16 @@ namespace MLP
                 }
                 #endregion
 
+                MlpTrainer.EvaluationModel epochEvaluation = null;
+                if (evaluateOnEachEpoch)
+                {
+                    epochEvaluation = MlpTrainer.Evaluate(this, testSet);
+                    epochEvaluations.Add(epochEvaluation);
+                }
+
                 if (isVerbose)
                 {
-                    var percentage = MlpTrainer.Evaluate(this, validationSet).Percentage;
+                    var percentage = (epochEvaluation ?? MlpTrainer.Evaluate(this, testSet)).Percentage;
                     Console.WriteLine($"Epoch - {epoch}," +
                                       $" error - {errorSum.ToString("#0.000")}," +
                                       $" test - {percentage.ToString("#0.00")}");
@@ -247,7 +259,8 @@ namespace MLP
             {
                 Mlp = this,
                 Epochs = epoch,
-                EpochErrors = epochErrors.ToArray()
+                EpochErrors = epochErrors.ToArray(),
+                Evaluations = epochEvaluations.ToArray()
             };
 
             return trainingResult;

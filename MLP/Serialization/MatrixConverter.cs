@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using MathNet.Numerics.LinearAlgebra.Double;
 using MathNet.Numerics.LinearAlgebra.Storage;
 using Newtonsoft.Json;

@@ -5,7 +5,7 @@ namespace MLP.Training
 {
     public static class MlpTrainer
     {
-        public static TrainingStatistics TrainOnMnist(MlpOptions options)
+        public static TrainingResult TrainOnMnist(MlpOptions options)
         {
             var isVerbose = options.IsVerbose;
 
@@ -15,6 +15,7 @@ namespace MLP.Training
                 options.Sizes);
 
             var trainingSet = MnistParser.ReadAll(options.TrainingPath);
+            var testSet = MnistParser.ReadAll(options.TestPath);
             var validationSet = MnistParser.ReadAll(options.ValidationPath);
 
             var trainingModel = new TrainingModel
@@ -23,23 +24,20 @@ namespace MLP.Training
                 ErrorThreshold = options.ErrorThreshold,
                 ValidationSet = validationSet,
                 TrainingSet = trainingSet,
+                TestSet = testSet,
                 IsVerbose = isVerbose,
-                BathSize = options.BatchSize,
+                BatchSize = options.BatchSize,
                 LearningRate = options.LearningRate,
-                Momentum = options.Momentum
+                Momentum = options.Momentum,
+                EvaluateOnEachEpoch = options.EvaluateOnEachEpoch
             };
 
             var trainingResult = mlp.Train(trainingModel);
 
-            var statistics = new TrainingStatistics
-            {
-                TrainingResult = trainingResult
-            };
-
-            return statistics;
+            return trainingResult;
         }
 
-        public static MlpEvaluationModel Evaluate(Mlp mlp, InputModel[] testData)
+        public static EvaluationModel Evaluate(Mlp mlp, InputModel[] testData)
         {
             var correctSolutions = 0;
 
@@ -52,7 +50,7 @@ namespace MLP.Training
                 if (decision == model.Label) correctSolutions++;
             }
 
-            var result = new MlpEvaluationModel
+            var result = new EvaluationModel
             {
                 Correct = correctSolutions,
                 All = testData.Length
@@ -61,7 +59,7 @@ namespace MLP.Training
             return result;
         }
 
-        public class MlpEvaluationModel
+        public class EvaluationModel
         {
             public int All { get; set; }
             public int Correct { get; set; }

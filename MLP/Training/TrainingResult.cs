@@ -7,5 +7,7 @@
         public int Epochs { get; set; }
 
         public double[] EpochErrors { get; set; }
+
+        public MlpTrainer.EvaluationModel[] Evaluations { get; set; }
     }
 }

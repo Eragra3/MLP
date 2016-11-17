@@ -1,8 +1,5 @@
-﻿using System;
-using System.Diagnostics;
-using System.Drawing;
+﻿using System.Drawing;
 using System.IO;
-using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.LinearAlgebra.Double;
 using MLP.Training;
 
@@ -10,7 +7,7 @@ namespace MLP.MnistHelpers
 {
     public static class MnistParser
     {
-        public static readonly char[] FileSeparators = new[] { '/', '\\' };
+        public static readonly char[] FileSeparators = { '/', '\\' };
 
         public static MnistImage ReadImage(string path)
         {
