@@ -67,7 +67,7 @@ namespace MLP.Training
             public int Correct { get; set; }
 
             public int Incorrect => All - Correct;
-            public double Percentage => Math.Round((double)Correct / All, 2);
+            public double Percentage => Math.Round((double)Correct / All * 100, 2);
         }
     }
 }

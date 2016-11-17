@@ -180,7 +180,7 @@ namespace MLP
             if (isVerbose)
             {
                 var percentage = MlpTrainer.Evaluate(this, validationSet).Percentage;
-                Console.WriteLine($"Initial state, {percentage}");
+                Console.WriteLine($"Initial state, {percentage.ToString("#0.00")}");
             }
 
             while (errorSum > errorTreshold && epoch < maxEpochs)
@@ -201,7 +201,7 @@ namespace MLP
                     var solution = bpResult.Solution;
                     var expectedSolution = item.ExpectedSolution;
 
-                    errorSum += solution.Map2((y, o) => Math.Pow(y - o, 2), expectedSolution).Sum();
+                    errorSum += solution.Map2((y, o) => Math.Abs(y - o), expectedSolution).Sum();
                 }
                 errorSum /= batchSize;
 
@@ -228,7 +228,7 @@ namespace MLP
                     var percentage = MlpTrainer.Evaluate(this, validationSet).Percentage;
                     Console.WriteLine($"Epoch - {epoch}," +
                                       $" error - {errorSum.ToString("#0.000")}," +
-                                      $" test - {percentage}");
+                                      $" test - {percentage.ToString("#0.00")}");
                 }
 
 
