@@ -298,6 +298,10 @@ namespace MLP
                     log.AppendLine();
                 }
                 File.WriteAllText(path, log.ToString());
+
+                #region dump plot
+                Charter.Charter.GenerateExperimentPlot(trainingResponses, logPath + "_" + momentum, 0, 100);
+                #endregion
             }
         }
     }

@@ -34,6 +34,12 @@
 
 ## momentum
 
-Start-Process -NoNewWindow -FilePath .\MLP.exe -ArgumentList "experiment --output mom_sig/mom --values [0.01,0.1,0.2,0.5,0.9,1] --experiment momentum --sizes [70,200,10] --learning-rate 3 --error-threshold 0 --max-epochs 200 --batch-size 10 --activation sigmoid --normal 0.3 --repetitions 3"
+#Start-Process -NoNewWindow -FilePath .\MLP.exe -ArgumentList "experiment --output mom_sig/mom --values [0,0.01,0.1,0.2,0.5,0.9,1] --experiment momentum --sizes [70,200,10] --learning-rate 3 --error-threshold 0 --max-epochs 200 --batch-size 10 --activation sigmoid --normal 0.3 --repetitions 3"
 
-Start-Process -NoNewWindow -FilePath .\MLP.exe -ArgumentList "experiment --output mom_tanh/mom --values [0.01,0.1,0.2,0.5,0.9,1] --experiment momentum --sizes [70,200,10] --learning-rate 0.4 --error-threshold 0 --max-epochs 200 --batch-size 10 --activation tanh --normal 0.09 --repetitions 3"
+#Start-Process -NoNewWindow -FilePath .\MLP.exe -ArgumentList "experiment --output mom_tanh/mom --values [0,0.01,0.1,0.2,0.5,0.9,1] --experiment momentum --sizes [70,200,10] --learning-rate 0.4 --error-threshold 0 --max-epochs 200 --batch-size 10 --activation tanh --normal 0.09 --repetitions 3"
+
+## momentum long
+
+Start-Process -NoNewWindow -FilePath .\MLP.exe -ArgumentList "experiment --output mom_sig_long/mom --values [0,0.01,0.1,0.2,0.5,0.9,1] --experiment momentum --sizes [70,200,10] --learning-rate 3 --error-threshold 0 --max-epochs 1000 --batch-size 10 --activation sigmoid --normal 0.3 --repetitions 3"
+
+Start-Process -NoNewWindow -FilePath .\MLP.exe -ArgumentList "experiment --output mom_tanh_long/mom --values [0,0.01,0.1,0.2,0.5,0.9,1] --experiment momentum --sizes [70,200,10] --learning-rate 0.4 --error-threshold 0 --max-epochs 1000 --batch-size 10 --activation tanh --normal 0.09 --repetitions 3"
