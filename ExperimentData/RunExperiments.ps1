@@ -26,4 +26,14 @@
 #normalized
 #.\MLP.exe train --output mlp_sigmoid.json --sizes [70,200,10] --learning-rate 4 --momentum 0 --error-threshold 0 --max-epochs 400 --batch-size 10 --activation sigmoid --normal 0.4 -n
 
-.\MLP.exe train --output mlp_tanh.json --sizes [70,200,10] --learning-rate 0.6 --momentum 0 --error-threshold 0 --max-epochs 400 --batch-size 10 --activation tanh --normal 0.09 -n
+#.\MLP.exe train --output mlp_tanh.json --sizes [70,200,10] --learning-rate 0.6 --momentum 0 --error-threshold 0 --max-epochs 400 --batch-size 10 --activation tanh --normal 0.09 -n
+
+## learning rate long comparison
+
+#Start-Process -NoNewWindow -FilePath .\MLP.exe -ArgumentList "experiment --output lr_long/lr_long --values [0.1,0.5,4] --experiment learningrate --sizes [70,200,10] --momentum 0 --error-threshold 0 --max-epochs 5000 --batch-size 10 --activation sigmoid --normal 0.3 --repetitions 3"
+
+## momentum
+
+Start-Process -NoNewWindow -FilePath .\MLP.exe -ArgumentList "experiment --output mom_sig/mom --values [0.01,0.1,0.2,0.5,0.9,1] --experiment momentum --sizes [70,200,10] --learning-rate 3 --error-threshold 0 --max-epochs 200 --batch-size 10 --activation sigmoid --normal 0.3 --repetitions 3"
+
+Start-Process -NoNewWindow -FilePath .\MLP.exe -ArgumentList "experiment --output mom_tanh/mom --values [0.01,0.1,0.2,0.5,0.9,1] --experiment momentum --sizes [70,200,10] --learning-rate 0.4 --error-threshold 0 --max-epochs 200 --batch-size 10 --activation tanh --normal 0.09 --repetitions 3"

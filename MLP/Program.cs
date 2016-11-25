@@ -264,6 +264,13 @@ namespace MLP
                                 }
                             case Experiment.Momentum:
                                 {
+                                    var values = JsonConvert.DeserializeObject<double[]>(experimentValues);
+                                    ExperimentRunner.RunMomentumExperiment(
+                                        values,
+                                        options,
+                                        repetitions,
+                                        outputPath
+                                        );
                                     break;
                                 }
                             case Experiment.NormalDistStDev:
