@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 
 namespace MLP
@@ -26,13 +27,13 @@ namespace MLP
 
         public static Vector<double> Tanh(Vector<double> input)
         {
-            var result = input.Map(Math.Tanh, Zeros.Include);
+            var result = input.Map(Math.Tanh);
             return result;
         }
 
         public static Vector<double> TanhPrime(Vector<double> input)
         {
-            var result = input.Map(x => 1 - Math.Pow(Math.Tanh(x), 2), Zeros.Include);
+            var result = input.Map(x => 1 - Math.Pow(Math.Tanh(x), 2));
 
             return result;
         }

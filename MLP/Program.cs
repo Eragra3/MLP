@@ -4,6 +4,7 @@ using MLP.Cmd;
 using MLP.MnistHelpers;
 using TTRider.FluidCommandLine;
 using System.IO;
+using System.Linq;
 using MathNet.Numerics;
 using MLP.Experiments;
 using MLP.Training;
@@ -13,7 +14,7 @@ namespace MLP
 {
     class Program
     {
-        private const string DATA_PATH = "../../";
+        private const string DATA_PATH = "";
         private const string TEST_DATA_PATH = DATA_PATH + "TestData";
         private const string TRAINING_DATA_PATH = DATA_PATH + "TestData";
         private const string VALIDATION_PATH = DATA_PATH + "ValidationData";
@@ -33,20 +34,22 @@ namespace MLP
             bool dump = false;
             bool evaluate = false;
 
+            bool normalize = false;
+
             //mlp params
             int[] layersSizes = { 70, 200, 10 };
-            double learningRate = 0.25;
-            double momentum = 0.01;
-            double errorThreshold = 1;
+            double learningRate = 7;
+            double momentum = 0.00;
+            double errorThreshold = 0;
             int batchSize = 20;
             ActivationFunction activationFunction = ActivationFunction.Sigmoid;
             double normalStDev = 0.5;
 
             int maxEpochs = 200;
 
-            double[] experimentValues = null;
+            string experimentValues = null;
             Experiment experiment = Experiment.LearningRate;
-            int repetitions = 1;
+            int repetitions = 3;
 
             ICommandLine commandLine = CommandLine
                 .Help("h")
@@ -58,6 +61,8 @@ namespace MLP
                     .Option("verbose", () => isVerbose = true, "Explain what is happening")
                     .Option("e", () => evaluate = true, "Evaluate using MNIST dataset")
                     .Option("evaluate", () => evaluate = true, "Evaluate using MNIST dataset")
+                    .Option("n", () => normalize = true, "Normalize input")
+                    .Option("normalize", () => normalize = true, "Normalize input")
                 .Command("train", () => command = Command.Train, "Train new MLP")
                     .DefaultParameter("output", path => outputPath = path, "Output file to save trained mlp")
                     .Parameter("sizes", sizes => layersSizes = JsonConvert.DeserializeObject<int[]>(sizes), "Number of layer and its sizes, default to [70,5,10]", "Sizes")
@@ -70,15 +75,19 @@ namespace MLP
                     .Parameter("normal", val => normalStDev = double.Parse(val, CultureInfo.InvariantCulture), "Initial weights normal distribution standard deviation")
                     .Option("v", () => isVerbose = true, "Explain what is happening")
                     .Option("verbose", () => isVerbose = true, "Explain what is happening")
+                    .Option("n", () => normalize = true, "Normalize input")
+                    .Option("normalize", () => normalize = true, "Normalize input")
                 .Command("view", () => command = Command.View, "Show MNIST image")
                     .DefaultParameter("path", path => imagePath = path, "Path to image")
                     .Option("p", () => print = true, "Display grayscale interpretation")
                     .Option("print", () => print = true, "Display grayscale interpretation")
                     .Option("d", () => dump = true, "Dump image data")
                     .Option("dump", () => dump = true, "Dump image data")
+                    .Option("n", () => normalize = true, "Normalize input")
+                    .Option("normalize", () => normalize = true, "Normalize input")
                 .Command("experiment", () => command = Command.Experiment, "Run experiment")
                     .DefaultParameter("output", path => outputPath = path, "Path to save data")
-                    .Parameter("values", val => experimentValues = JsonConvert.DeserializeObject<double[]>(val), "Values to test in experiment", "Experiment values")
+                    .Parameter("values", val => experimentValues = val, "Values to test in experiment", "Experiment values")
                     .Parameter("experiment", val => experiment = ParseExperimentType(val), "Momenum parameter")
                     .Parameter("sizes", sizes => layersSizes = JsonConvert.DeserializeObject<int[]>(sizes), "Number of layer and its sizes, default to [70,5,10]", "Sizes")
                     .Parameter("learning-rate", val => learningRate = double.Parse(val, CultureInfo.InvariantCulture), "Learning rate")
@@ -91,6 +100,8 @@ namespace MLP
                     .Parameter("repetitions", val => repetitions = int.Parse(val, CultureInfo.InvariantCulture), "Number of repetitions for each value in experiment")
                     .Option("v", () => isVerbose = true, "Explain what is happening")
                     .Option("verbose", () => isVerbose = true, "Explain what is happening")
+                    .Option("n", () => normalize = true, "Normalize input")
+                    .Option("normalize", () => normalize = true, "Normalize input")
                 .End();
 
             commandLine.Run(args);
@@ -122,7 +133,8 @@ namespace MLP
                             batchSize,
                             activationFunction,
                             normalStDev,
-                            false
+                            false,
+                            normalize
                             );
 
                         var trainingResult = MlpTrainer.TrainOnMnist(options);
@@ -156,7 +168,7 @@ namespace MLP
                                 return;
                             }
 
-                            var image = MnistParser.ReadImage(imagePath);
+                            var image = MnistParser.ReadImage(imagePath, normalize);
 
                             var decision = mlp.Compute(image.Values);
 
@@ -166,7 +178,7 @@ namespace MLP
 
                         if (evaluate)
                         {
-                            var testData = MnistParser.ReadAll(TEST_DATA_PATH);
+                            var testData = MnistParser.ReadAll(TEST_DATA_PATH, normalize);
 
                             var evaluation = MlpTrainer.Evaluate(mlp, testData);
 
@@ -189,7 +201,7 @@ namespace MLP
                             return;
                         }
 
-                        var model = MnistParser.ReadImage(imagePath);
+                        var model = MnistParser.ReadImage(imagePath, normalize);
 
                         if (dump)
                         {
@@ -222,23 +234,49 @@ namespace MLP
                             batchSize,
                             activationFunction,
                             normalStDev,
-                            true
+                            true,
+                            normalize
                             );
 
                         switch (experiment)
                         {
                             case Experiment.LearningRate:
-                                ExperimentRunner.RunLearningRateExperiment(
-                                    experimentValues,
-                                    options,
-                                    repetitions,
-                                    outputPath
-                                    );
-                                break;
+                                {
+                                    var values = JsonConvert.DeserializeObject<double[]>(experimentValues);
+                                    ExperimentRunner.RunLearningRateExperiment(
+                                        values,
+                                        options,
+                                        repetitions,
+                                        outputPath
+                                        );
+                                    break;
+                                }
                             case Experiment.ActivationFunction:
-                                break;
+                                {
+                                    var values = JsonConvert.DeserializeObject<ActivationFunction[]>(experimentValues);
+                                    ExperimentRunner.RunActivationFunctionExperiment(
+                                        values,
+                                        options,
+                                        repetitions,
+                                        outputPath
+                                        );
+                                    break;
+                                }
                             case Experiment.Momentum:
-                                break;
+                                {
+                                    break;
+                                }
+                            case Experiment.NormalDistStDev:
+                                {
+                                    var values = JsonConvert.DeserializeObject<double[]>(experimentValues);
+                                    ExperimentRunner.RunNormalDistStDevExperiment(
+                                        values,
+                                        options,
+                                        repetitions,
+                                        outputPath
+                                        );
+                                    break;
+                                }
                             default:
                                 throw new ArgumentOutOfRangeException();
                         }
@@ -270,10 +308,12 @@ namespace MLP
             {
                 case "learningrate":
                     return Experiment.LearningRate;
-                case "activation":
+                case "activationfunction":
                     return Experiment.ActivationFunction;
                 case "momentum":
                     return Experiment.Momentum;
+                case "standarddeviation":
+                    return Experiment.NormalDistStDev;
                 default:
                     throw new ArgumentException();
             }

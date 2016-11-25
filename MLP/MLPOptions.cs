@@ -28,7 +28,9 @@
 
         public bool EvaluateOnEachEpoch { get; set; }
 
-        public MlpOptions(double learningRate, double momentum, double errorThreshold, int[] sizes, string trainingPath, string validationPath, string testPath, int maxEpochs, bool isVerbose, int batchSize, ActivationFunction activationFunction, double normalStDeviation, bool evaluateOnEachEpoch)
+        public bool NormalizeInput { get; set; }
+
+        public MlpOptions(double learningRate, double momentum, double errorThreshold, int[] sizes, string trainingPath, string validationPath, string testPath, int maxEpochs, bool isVerbose, int batchSize, ActivationFunction activationFunction, double normalStDeviation, bool evaluateOnEachEpoch, bool normalizeInput)
         {
             LearningRate = learningRate;
             Momentum = momentum;
@@ -43,6 +45,7 @@
             ActivationFunction = activationFunction;
             NormalStDeviation = normalStDeviation;
             EvaluateOnEachEpoch = evaluateOnEachEpoch;
+            NormalizeInput = normalizeInput;
         }
     }
 }

@@ -10,6 +10,7 @@ namespace MLP.Experiments
     {
         LearningRate,
         ActivationFunction,
-        Momentum
+        Momentum,
+        NormalDistStDev
     }
 }

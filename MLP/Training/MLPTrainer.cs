@@ -15,27 +15,27 @@ namespace MLP.Training
         public static TrainingResult TrainOnMnist(MlpOptions options)
         {
             var isVerbose = options.IsVerbose;
+            var normalize = options.NormalizeInput;
 
             var mlp = new Mlp(
                 options.ActivationFunction,
                 options.NormalStDeviation,
                 options.Sizes);
-
             if (_trainingSetPath != options.TrainingPath || _trainingSet == null)
             {
-                _trainingSet = MnistParser.ReadAll(options.TrainingPath);
+                _trainingSet = MnistParser.ReadAll(options.TrainingPath, normalize);
                 _trainingSetPath = options.TrainingPath;
             }
             var trainingSet = _trainingSet;
             if (_testSetPath != options.TestPath || _testSet == null)
             {
-                _testSet = MnistParser.ReadAll(options.TestPath);
+                _testSet = MnistParser.ReadAll(options.TestPath, normalize);
                 _testSetPath = options.TestPath;
             }
             var testSet = _testSet;
             if (_validationSetPath != options.ValidationPath || _validationSet == null)
             {
-                _validationSet = MnistParser.ReadAll(options.ValidationPath);
+                _validationSet = MnistParser.ReadAll(options.ValidationPath, normalize);
                 _validationSetPath = options.ValidationPath;
             }
             var validationSet = _validationSet;

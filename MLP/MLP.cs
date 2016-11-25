@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using MathNet.Numerics.LinearAlgebra;
 using MLP.Training;
 using Newtonsoft.Json;
@@ -188,6 +190,16 @@ namespace MLP
                 Console.WriteLine($"Initial state, {percentage.ToString("#0.00")}");
             }
 
+            #region log data
+            //log data
+            var path = "log.csv";
+
+            StringBuilder log = new StringBuilder("sep=|");
+            log.AppendLine();
+            log.Append("epoch|evaluation_0|error_0");
+            log.AppendLine();
+            #endregion
+
             while (errorSum > errorTreshold && epoch < maxEpochs)
             {
                 epoch++;
@@ -243,6 +255,11 @@ namespace MLP
                                       $" test - {percentage.ToString("#0.00")}");
                 }
 
+                #region dump data
+                var eval = (epochEvaluation ?? MlpTrainer.Evaluate(this, testSet)).Percentage;
+
+                log.AppendLine(epoch + "|" + eval + "|" + errorSum);
+                #endregion
 
                 #region set nablas to zeroes
                 for (int i = 0; i < layersCount; i++)
@@ -254,6 +271,10 @@ namespace MLP
 
                 epochErrors.Add(errorSum);
             }
+
+            #region log data
+            File.WriteAllText(path, log.ToString());
+            #endregion
 
             var trainingResult = new TrainingResult
             {

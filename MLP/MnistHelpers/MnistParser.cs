@@ -9,7 +9,7 @@ namespace MLP.MnistHelpers
     {
         public static readonly char[] FileSeparators = { '/', '\\' };
 
-        public static MnistImage ReadImage(string path)
+        public static MnistImage ReadImage(string path, bool normalize)
         {
             Bitmap bitmap = new Bitmap(path);
 
@@ -35,6 +35,13 @@ namespace MLP.MnistHelpers
             var solution = new DenseVector(10);
             solution[label] = 1.0;
 
+            if (normalize)
+            {
+                var max = values.Maximum();
+                max /= 2;
+                values.MapInplace(v => v - max);
+            }
+
             var image = new MnistImage
             {
                 Width = bitmap.Width,
@@ -48,7 +55,7 @@ namespace MLP.MnistHelpers
             return image;
         }
 
-        public static MnistImage[] ReadAll(string pathToDirectory)
+        public static MnistImage[] ReadAll(string pathToDirectory, bool normalize)
         {
             var directoryInfo = new DirectoryInfo(pathToDirectory);
 
@@ -58,7 +65,7 @@ namespace MLP.MnistHelpers
 
             for (int i = 0; i < files.Length; i++)
             {
-                models[i] = ReadImage(files[i].FullName);
+                models[i] = ReadImage(files[i].FullName, normalize);
             }
 
             return models;
